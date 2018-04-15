@@ -41,11 +41,20 @@ Install the dependencies
 pip install -r requirements.txt
 ```
 
-If you want the application to run automatically at startup add /path/to/PlantHealth/bin/run.sh to your ~/.bashrc file. 
+Make the program executable
+```
+chmod +x ./planthealth/main.py
+```
+
+If you want the application to run automatically at startup add 
+```
+python3 /path/to/PlantHealth/planthealth/main.py
+```
+to your ~/.bashrc file. 
 
 Otherwise, run 
 ```
-/path/to/PlantHealth/bin/run.sh
+python3 /path/to/PlantHealth/planthealth/main.py
 ```
 
 
