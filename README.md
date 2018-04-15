@@ -13,12 +13,9 @@ These instructions will get you a copy of the project up and running on your loc
 ### Hardware 
 
 What things you need to use this software
-
-```
-RaspberryPi
-Pi NoIR Camera with blue filter
-Touchscreen Display
-```
+* RaspberryPi
+* Pi NoIR Camera with blue filter
+* Touchscreen Display
 
 
 
