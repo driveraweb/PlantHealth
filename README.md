@@ -48,7 +48,7 @@ If you want the application to run automatically at startup add /path/to/PlantHe
 
 Otherwise, run 
 ```
-/path/toPlantHealth/bin/run.sh
+/path/to/PlantHealth/bin/run.sh
 ```
 
 
