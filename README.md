@@ -10,19 +10,21 @@ These instructions will get you a copy of the project up and running on your loc
 
 
 
-### Prerequisites
+### Hardware 
 
-What things you need to install the software and how to install them
+What things you need to use this software
 
 ```
-Give examples
+RaspberryPi
+Pi NoIR Camera with blue filter
+Touchscreen Display
 ```
 
 
 
 ### Installing
 
-A step by step series that tells you how to get a Plant Health imaging system running
+A step-by-step series that tells you how to get a Plant Health imaging software running
 
 *Using your RaspberryPi Terminal**
 
@@ -42,7 +44,12 @@ Install the dependencies
 pip install -r requirements.txt
 ```
 
-If you want the application to run automatically at startup add ~/path/to'/PlantHealth/bin/run.sh' to your ~/.bashrc file
+If you want the application to run automatically at startup add /path/to/PlantHealth/bin/run.sh to your ~/.bashrc file. 
+
+Otherwise, run 
+```
+/path/toPlantHealth/bin/run.sh
+```
 
 
 
