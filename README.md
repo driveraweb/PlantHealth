@@ -42,7 +42,7 @@ Install the dependencies
 pip install -r requirements.txt
 ```
 
-If you want the application to run automatically at startup add '~/\[path/to\]/PlantHealth/bin/run.sh' to your ~/.bashrc file
+If you want the application to run automatically at startup add ~/path/to'/PlantHealth/bin/run.sh' to your ~/.bashrc file
 
 
 
