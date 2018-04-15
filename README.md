@@ -26,7 +26,7 @@ Touchscreen Display
 
 A step-by-step series that tells you how to get a Plant Health imaging software running
 
-*Using your RaspberryPi Terminal**
+**Using your RaspberryPi Terminal**
 
 Create a directory for the applicaction
 ```
