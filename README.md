@@ -25,34 +25,27 @@ A step-by-step series that tells you how to get a Plant Health imaging software 
 
 **Using your RaspberryPi Terminal**
 
-Create a directory for the applicaction
+Clone the PlantHealth repo:
 ```
-mkdir PlantHealth
+git clone https://github.com/driveraweb/PlantHealth.git .
 cd PlantHealth
 ```
 
-Clone the PlantHealth repo
-```
-git clone https://github.com/driveraweb/PlantHealth.git .
-```
-
-Install the dependencies
+Install the dependencies:
 ```
 pip install -r requirements.txt
 ```
 
-Make the program executable
+Make the program executable:
 ```
 chmod +x ./planthealth/main.py
 ```
 
-If you want the application to run automatically at startup add 
+If you want the application to run automatically at startup, add the following to your ~/.bashrc file:
 ```
 python3 /path/to/PlantHealth/planthealth/main.py
 ```
-to your ~/.bashrc file. 
-
-Otherwise, run 
+Otherwise, run:
 ```
 python3 /path/to/PlantHealth/planthealth/main.py
 ```
@@ -65,7 +58,7 @@ Add additional notes about how to deploy this on a live system
 
 ## Built With
 
-
+Add notes about what software packages were used
 
 ## Authors
 
