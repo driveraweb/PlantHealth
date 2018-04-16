@@ -1,5 +1,5 @@
 ###### Requirements without Version Specifiers ######
 numpy
-#matplotlib
-#pillow
-#opencv-python
+matplotlib
+pillow
+opencv-python
