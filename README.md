@@ -41,11 +41,7 @@ Make the program executable:
 chmod +x ./planthealth/main.py
 ```
 
-If you want the application to run automatically at startup, add the following to your ~/.bashrc file:
-```
-python3 /path/to/PlantHealth/planthealth/main.py
-```
-Otherwise, run:
+To run:
 ```
 python3 /path/to/PlantHealth/planthealth/main.py
 ```
@@ -63,7 +59,7 @@ Add notes about what software packages were used
 ## Authors
 
 * **Jessi Jo Gonzales**
-* **Ryan Levendoski**
+* **Ryan Levendosky**
 * **Jose Olivarez**
 * **Derrick Rivera**
 
