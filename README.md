@@ -23,6 +23,10 @@ What things you need to use this software
 
 A step-by-step series that tells you how to get a Plant Health imaging software running
 
+[Install git](https://projects.raspberrypi.org/en/projects/getting-started-with-git/4)
+
+[Install Python3](https://www.python.org/downloads/)
+
 **Using your RaspberryPi Terminal**
 
 Clone the PlantHealth repo:
