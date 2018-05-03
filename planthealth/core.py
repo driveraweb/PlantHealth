@@ -20,24 +20,17 @@ def colormap(red, nir):
     ndvi = ndvi*255 #0 to 255
     
     ndvi = np.around(ndvi).astype('uint8') #round and convert to int
-    
-
-    #print(ndvi.shape)
-    
-    #ndvi_bgr[bgr] = ndvi
-    #ndvi_gry[gry] = ndvi
-    
-    #ndvi_bgr = cv2.applyColorMap(ndvi_bgr, cv2.COLORMAP_JET)
-    #ndvi_gry = cv2.applyColorMap(ndvi_gry, cv2.COLORMAP_BONE)
-    
-    
-    #ret, ndvi = cv2.threshold(ndvi, 127, 255, cv2.THRESH_TOZERO)
-    
-    #ndvi = cv2.applyColorMap(ndvi, cv2.COLORMAP_JET)
-    
-    
     ndvi = cv2.applyColorMap(ndvi, cv2.COLORMAP_JET)
-    return ndvi
+    ret, ndvi_trunc = cv2.threshold(ndvi, 208, 255, cv2.THRESH_TOZERO)
+    
+    
+    # print("ndvi_trunc has values:", ndvi_trunc)
+    # ndvi = cv2.applyColorMap(ndvi, cv2.COLORMAP_JET)
+    # ndvi_trunc = cv2.applyColorMap(ndvi_trunc, cv2.COLORMAP_JET)
+    # ret, ndvi_trunc = cv2.threshold(ndvi, 208, 255, cv2.THRESH_TOZERO)
+
+    
+    return ndvi, ndvi_trunc
  
 
 

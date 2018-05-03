@@ -43,3 +43,11 @@ def makeLUT():
     
     
     return r
+
+# BGRtoRGB()
+# converts image from B-G-R like cv2 uses to R-G-B like most other
+# libraries use
+def BGRtoRGB(a):
+    b, g, r = channelSplit(a)
+    a = np.concatenate((r,g,b))
+    return np.asarray(a)
