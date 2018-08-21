@@ -37,7 +37,7 @@ for i in range(0,128):
 ### append color to B&W
 RGB = np.append(bnw, RGB, axis=0)
 ### save LUT
-np.savetxt("../cmap.csv", RGB, delimiter=",")
+np.savetxt("../cmap.csv", RGB, delimiter=",", fmt="%d")
 
 ### create images to show color map
 test = np.arange(256)
