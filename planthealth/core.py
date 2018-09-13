@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import os
 
 ### FUNCTIONS USED FOR NDVI IMAGE PROCESSING AND USER INTERFACE ###
 
@@ -28,6 +29,9 @@ def ndvi_map(red_img, nir_img):
     
     Returns:  
     """
+    if not ('cmap' in globals()):
+        init()
+    
     red_img = red_img.astype(float)
     nir_img = nir_img.astype(float)
     
