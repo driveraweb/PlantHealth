@@ -1,6 +1,37 @@
-import numpy as np
-import cv2
+from core import *
+
+#used in utils only
+import pickle
 import scipy
+import matplotlib.pyplot as plt
+
+# plot_perf()
+# creates a plot for the specified performance measure given the data
+def plot_perf(f_path, perf_type=None):
+    if (perf_type == 'dims'):
+            with open(f_path, 'rb') as f:
+                r = np.asarray(pickle.load(f))
+                mean = np.mean(r.T[1].T, axis=0)
+                std = np.std(r.T[1].T,axis=0)
+                dims = r.T[0].T[0]
+                runs = r.shape[0]
+                
+            plt.figure()
+            plt.plot(dims, mean)
+            plt.fill_between(dims,mean-std,mean+std, color=(1,0,0,0.2))
+            #plt.plot(dims, mean+std, 'r--')
+            #plt.plot(dims, mean-std, 'r--')
+            #plt.legend(['mean', 'std+', 'std-'])
+            plt.xlabel('dimension (nxn)')
+            plt.ylabel('time (s)')
+            plt.title('Average Numpy NDVI Mapping Time (For '
+                       + str(runs) + ' Runs)')
+            plt.show()
+    
+    else:
+        print('Performance type not specified or supported.')
+    
+    return
 
 # channelSplit()
 # to get BGR values from a cv2 image
@@ -18,32 +49,6 @@ def showImage(img, t):
     
     return
     
-# makeLUT()
-# create lookup table for use with cv2 based on colormap
-# for PlantHealthDetection NDVI 
-def makeLUT():
-    r = np.zeros((256),dtype='float')
-    g = np.zeros((256),dtype='float')
-    b = np.zeros((256),dtype='float')
-    
-    #set up initial BW color values
-    for i in range(0,127):
-        r[i] = (i*1.2)
-        g[i] = (i*1.2)
-        b[i] = (i*1.2)
-    
-    #set up initial RGB color values
-    cVals[136] = (198, 65, 255) #violet
-    cVals[164] = (255, 65, 65) #red
-    cVals[182] = (255, 248, 65) #yellow
-    cVals[212] = (65, 255, 68)#green
-    cVals[255] = (65, 147, 255) #blue
-    # #interpolate missing values
-    scipy.interpolate.RegularGridInterpolator(cVals[127:255],)
-    
-    
-    return r
-
 # BGRtoRGB()
 # converts image from B-G-R like cv2 uses to R-G-B like most other
 # libraries use
