@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../../')
 from core import *
-from utils import plot_perf
+from utils import *
 from multiprocessing import Pool
 import time
 import os
@@ -18,10 +18,10 @@ def f(x):
 
 
 if __name__ == '__main__':
-    to_test = True
-    to_plot = not to_test
+    to_measure = True
+    to_plot = not to_measure
 
-    if to_test:
+    if to_measure:
         r = []
         for i in range(0,100):
             p = Pool(np.round(os.cpu_count()/2).astype('int'))
