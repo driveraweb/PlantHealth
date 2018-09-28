@@ -12,10 +12,16 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Hardware 
 
-What things you need to use this software
-* RaspberryPi
-* Pi NoIR Camera with blue filter
-* Touchscreen Display
+This software was designed and implemented using the following hardware:
+* RaspberryPi 3 B+
+* 16GB Micro SD Card
+* Pi NoIR Camera V2 
+* Roscolux #2007 Storaro Blue filter
+* Pi Camera V2
+* IVPort V2 Pi Camera Multiplexer 
+* Waveshare 7" Touchscreen Display
+* 3W Infrared Illuminator (2)
+* RAVPower 22000mAH 4.5A Portable Phone Power Pack
 
 
 

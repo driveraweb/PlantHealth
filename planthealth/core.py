@@ -1,6 +1,12 @@
 import numpy as np
+import scipy
 import cv2
 import os
+
+#cython stuff
+#cimport numpy as np
+#DTYPE = np.float32
+#ctypedef np.int_t DTYPE_t
 
 ### FUNCTIONS USED FOR NDVI IMAGE PROCESSING AND USER INTERFACE ###
 
@@ -29,8 +35,6 @@ def ndvi_map(red_img, nir_img):
     
     Returns:  
     """
-    if not ('cmap' in globals()):
-        init()
     
     red_img = red_img.astype(float)
     nir_img = nir_img.astype(float)
@@ -51,6 +55,16 @@ def ndvi_map(red_img, nir_img):
     
     return ndvi_img
  
-
-
+ 
+ # ndvi_map()
+ # using Cython
+ # def ndvi_map_c(np.ndarray red_img, np.ndarray nir_img):
+    # """uses cython for performance"""
+    # assert red_img.dtype == DTYPE and nir_img.dtype = DTYPE
+    
+    # cdef np.ndarray ndvi_img = np.empty_like(red_img, dtype=np.int8)
+    # cdef np.ndarray ndvi = np.empty_like(red_img)
+    # cdef np.ndarray denom = np.empty_like(red_img)
+    # cdef float min_ndvi
+    
     
