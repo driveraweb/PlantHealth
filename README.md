@@ -4,7 +4,7 @@ Being that changes in plant health may not be present upon visual inspection alo
 
 
 
-## Created By
+## Created By New Mexico State University ECE Students
 
 * **Jessi Jo Gonzales**
 * **Ryan Levendosky**
