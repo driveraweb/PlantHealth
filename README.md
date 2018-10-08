@@ -30,6 +30,7 @@ This software was designed and implemented using the following hardware:
 A step-by-step series that tells you how to get a Plant Health imaging software running
 
 [Install git](https://projects.raspberrypi.org/en/projects/getting-strated-with-git/4)
+
 [Introduction to git](https://product.hubspot.com/blog/git-and-github-tutorial-for-beginners)
 
 Install the dependencies:
@@ -49,6 +50,7 @@ This is where we add additional notes about how to deploy this on a live system
 ## Built With
 
 **Python Packages**
+
 six
 wheel
 setuptools
@@ -61,6 +63,7 @@ imageio
 wxPython from https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 
 
 **C++ Libraries**
+
 [OpenCV]()
 
 
