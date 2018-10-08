@@ -1,6 +1,12 @@
 ###### Requirements without Version Specifiers ######
+#first run sudo apt-get install build-essential libgkt-3-dev libglw1-mesa libglw1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev python-wxtools
+six
+wheel
+setuptools
 numpy
 matplotlib
 pillow
 opencv-python
+scikit-image
 imageio
+-U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 wxPython
