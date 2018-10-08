@@ -25,7 +25,7 @@ This software was designed and implemented using the following hardware:
 
 
 
-### Installing
+### Installing Software
 
 A step-by-step series that tells you how to get a Plant Health imaging software running
 
@@ -39,6 +39,8 @@ chmod +x install.sh
 ./install.sh
 pip install -r requirements.txt
 ```
+
+[Install OpenCV for C++](www.codebind.com/linux-tutorials/install-opencv-ubuntu-18-04-c-cpp-linux)
 
 
 ## Deployment
@@ -60,11 +62,11 @@ pillow
 opencv-python
 scikit-image
 imageio
-wxPython from https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 
+wxPython 
 
 **C++ Libraries**
 
-[OpenCV]()
+OpenCV
 
 
 
