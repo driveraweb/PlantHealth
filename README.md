@@ -29,44 +29,43 @@ This software was designed and implemented using the following hardware:
 
 A step-by-step series that tells you how to get a Plant Health imaging software running
 
-[Install git](https://projects.raspberrypi.org/en/projects/getting-started-with-git/4)
-
-[Install Python3](https://www.python.org/downloads/)
-
-**Using your RaspberryPi Terminal**
-
-Clone the PlantHealth repo:
-```
-git clone https://github.com/driveraweb/PlantHealth.git .
-cd PlantHealth
-```
+[Install git](https://projects.raspberrypi.org/en/projects/getting-strated-with-git/4)
+[Introduction to git](https://product.hubspot.com/blog/git-and-github-tutorial-for-beginners)
 
 Install the dependencies:
 ```
+chmod +x install.sh
+./install.sh
 pip install -r requirements.txt
 ```
-
-Make the program executable:
-```
-chmod +x ./planthealth/main.py
-```
-
-To run:
-```
-python3 /path/to/PlantHealth/planthealth/main.py
-```
-
 
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+This is where we add additional notes about how to deploy this on a live system
+
+
 
 ## Built With
 
-Add notes about what software packages were used
+**Python Packages**
+six
+wheel
+setuptools
+numpy
+matplotlib
+pillow
+opencv-python
+scikit-image
+imageio
+wxPython from https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 
 
-## Authors
+**C++ Libraries**
+[OpenCV]()
+
+
+
+## Created By
 
 * **Jessi Jo Gonzales**
 * **Ryan Levendosky**

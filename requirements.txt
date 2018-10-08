@@ -1,5 +1,4 @@
 ###### Requirements without Version Specifiers ######
-#first run './install.sh' - use 'chmod +x install.sh' if not executable
 six
 wheel
 setuptools
