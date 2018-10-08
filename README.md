@@ -2,6 +2,8 @@
 
 Being that changes in plant health may not be present upon visual inspection alone, it is necessary to have a cost-efficient method of visualizing plant health. This will result in increased awareness of declining plant health for common plant applications and allow for preemptive intervention efforts by the owner or overseer. 
 
+**NDVI Color Scale Used:**
+
 ![NDVI Scale](scale.jpg "NDVI Scale")
 
 
