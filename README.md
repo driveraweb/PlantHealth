@@ -5,11 +5,12 @@ Being that changes in plant health may not be present upon visual inspection alo
 
 
 ### Created By New Mexico State University ECE Students
+* **Mentor:**  Dr. Charles Creusere
 
-* **Jessi Jo Gonzales**
-* **Ryan Levendosky**
-* **Jose Olivarez**
-* **Derrick Rivera**
+* Jessi Jo Gonzales
+* Ryan Levendosky
+* Jose Olivarez
+* Derrick Rivera
 
 
 
