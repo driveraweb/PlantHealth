@@ -4,6 +4,15 @@ Being that changes in plant health may not be present upon visual inspection alo
 
 
 
+### Created By New Mexico State University ECE Students
+
+* Jessi Jo Gonzales
+* Ryan Levendosky
+* Jose Olivarez
+* Derrick Rivera
+* **Mentor:**  Dr. Charles Creusere
+
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
@@ -25,53 +34,48 @@ This software was designed and implemented using the following hardware:
 
 
 
-### Installing
+### Installing Software
 
 A step-by-step series that tells you how to get a Plant Health imaging software running
 
-[Install git](https://projects.raspberrypi.org/en/projects/getting-started-with-git/4)
+[Install git](https://projects.raspberrypi.org/en/projects/getting-strated-with-git/4)
 
-[Install Python3](https://www.python.org/downloads/)
-
-**Using your RaspberryPi Terminal**
-
-Clone the PlantHealth repo:
-```
-git clone https://github.com/driveraweb/PlantHealth.git .
-cd PlantHealth
-```
+[Introduction to git](https://product.hubspot.com/blog/git-and-github-tutorial-for-beginners)
 
 Install the dependencies:
 ```
+chmod +x install.sh
+./install.sh
 pip install -r requirements.txt
 ```
 
-Make the program executable:
-```
-chmod +x ./planthealth/main.py
-```
-
-To run:
-```
-python3 /path/to/PlantHealth/planthealth/main.py
-```
-
+[Install OpenCV for C++](www.codebind.com/linux-tutorials/install-opencv-ubuntu-18-04-c-cpp-linux)
 
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+This is where we add additional notes about how to deploy this on a live system
+
+
 
 ## Built With
 
-Add notes about what software packages were used
+**Python Packages**
 
-## Authors
+* six
+* wheel
+* setuptools
+* numpy
+* matplotlib
+* pillow
+* opencv-python
+* scikit-image
+* imageio
+* wxPython 
 
-* **Jessi Jo Gonzales**
-* **Ryan Levendosky**
-* **Jose Olivarez**
-* **Derrick Rivera**
+**C++ Libraries**
+
+* OpenCV
 
 
 

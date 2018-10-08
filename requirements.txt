@@ -1,6 +1,11 @@
 ###### Requirements without Version Specifiers ######
+six
+wheel
+setuptools
 numpy
 matplotlib
 pillow
 opencv-python
+scikit-image
 imageio
+ -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 wxPython
