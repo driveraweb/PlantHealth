@@ -51,7 +51,7 @@ chmod +x install.sh
 pip install -r requirements.txt
 ```
 
-[Install OpenCV for C++](www.codebind.com/linux-tutorials/install-opencv-ubuntu-18-04-c-cpp-linux)
+[Install OpenCV for C++](https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html)
 
 
 ## Deployment
