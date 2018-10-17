@@ -52,6 +52,9 @@ chmod +x install.sh
 ./install.sh
 pip install -r requirements.txt
 ```
+[Install IVPort-v2](https://github.com/ivmech/ivport-v2)
+
+[Install picamera](https://github.com/waveform80/picamera) 
 
 [Install OpenCV for C++](https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html)
 
