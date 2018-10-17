@@ -4,6 +4,7 @@ wheel
 setuptools
 numpy
 matplotlib
+cython
 pillow
 opencv-python
 scikit-image
