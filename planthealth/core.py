@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+import numexpr as ne
 import scipy
 import cv2
 import os
@@ -92,24 +93,10 @@ def ndvi_map(red_img, nir_img):
     Returns:  
     """
     
-    red_img = red_img.astype(float)
-    nir_img = nir_img.astype(float)
+    #calculate NDVI values pixel-wise and scale to 0-255
+    idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
     
-    #calculate NDVI values pixel-wise
-    denom = (nir_img+red_img)
-    denom[denom<=0] = 0.0001
-    ndvi = ((((nir_img - red_img) / denom) - 1)*128).astype('uint8')
-    
-    #scale to range [0,255]
-    #min_ndvi = np.min(ndvi)
-    #ndvi = ((ndvi - 1) * 255) / 2
-    #ndvi = np.around(ndvi).astype('uint8')
-    
-    #colormap
-    ndvi_img = np.empty_like([ndvi]*3)
-    ndvi_img = CMAP[ndvi]
-    
-    return ndvi_img
+    return CMAP[idx]
  
  
  # ndvi_map()
