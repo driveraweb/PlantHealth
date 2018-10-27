@@ -1,6 +1,7 @@
 from PIL import Image
 import numpy as np
 import numexpr as ne
+import picamera
 import scipy
 import cv2
 import os
@@ -97,6 +98,20 @@ def ndvi_map(red_img, nir_img):
     idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
     
     return CMAP[idx]
+ 
+ 
+ 
+# capture_image()
+# requires a camera setup with:
+#   resolution = (1920,1080)
+#   framerate = 24
+#   time.sleep(2)
+ def snapshot(camera):
+    camera.resolution = (1920, 1080)
+    camera.framerate = 24
+    img = np.empty((1080, 1920, 3), dtype=np.int8)
+    camera.capture(img, 'rgb')
+    return img
  
  
  # ndvi_map()
