@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 import numexpr as ne
-import picamera
+#import picamera
 import scipy
 import cv2
 import os
@@ -106,7 +106,7 @@ def ndvi_map(red_img, nir_img):
 #   resolution = (1920,1080)
 #   framerate = 24
 #   time.sleep(2)
- def snapshot(camera):
+def snapshot(camera):
     camera.resolution = (1920, 1080)
     camera.framerate = 24
     img = np.empty((1080, 1920, 3), dtype=np.int8)
