@@ -6,6 +6,7 @@ numpy
 numexpr
 matplotlib
 cython
+picamera
 pillow
 opencv-python
 scikit-image
