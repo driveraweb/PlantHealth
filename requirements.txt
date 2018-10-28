@@ -3,6 +3,7 @@ six
 wheel
 setuptools
 numpy
+numexpr
 matplotlib
 cython
 pillow
