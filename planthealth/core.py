@@ -5,7 +5,7 @@ import numexpr as ne
 import scipy
 import cv2
 import os
-from planthealth import MAX_FEATURES, GOOD_MATCH_PERCENT, CMAP
+from config import *
 
 #cython stuff
 #cimport numpy as np
@@ -14,16 +14,6 @@ from planthealth import MAX_FEATURES, GOOD_MATCH_PERCENT, CMAP
 
 ### FUNCTIONS USED FOR NDVI IMAGE PROCESSING AND USER INTERFACE ###
 
-#init()
-def init(pathto_cmap='cmap.csv'):
-    """
-    
-    """
-    global cmap
-    cmap = np.genfromtxt(pathto_cmap, delimiter=',', dtype='uint8')
-
-    
-    
 #alignImages()
 def alignImages(im1, im2):
     """
@@ -69,6 +59,7 @@ def alignImages(im1, im2):
 
     # Find homography.
     h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
+    print(np.array_repr(h))
 
     # Use homography.
     height, width, channels = im2.shape
@@ -96,7 +87,8 @@ def ndvi_map(red_img, nir_img):
     
     #calculate NDVI values pixel-wise and scale to 0-255
     idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
-    
+    #idx = (((nir_img - red_img) / (nir_img+red_img) + 1)*128).astype('uint8')
+
     return CMAP[idx]
  
  
@@ -107,8 +99,6 @@ def ndvi_map(red_img, nir_img):
 #   framerate = 24
 #   time.sleep(2)
 def snapshot(camera):
-    camera.resolution = (1920, 1080)
-    camera.framerate = 24
     img = np.empty((1080, 1920, 3), dtype=np.int8)
     camera.capture(img, 'rgb')
     return img

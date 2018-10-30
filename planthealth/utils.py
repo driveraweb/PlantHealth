@@ -27,17 +27,65 @@ def plot_perf(f_path, perf_type=None):
             plt.title('Average Numpy NDVI Mapping Time (For '
                        + str(runs) + ' Runs)')
             plt.show()
-    
+    elif (perf_type == 'registration'):
+        with open(f_path, 'rb') as f:
+            r = np.asarray(pickle.load(f))
+            t = r.T[1].flatten().T
+            mean_val = np.mean(t, axis=0)
+            min = np.min(t, axis=0)
+            std = np.std(t, axis=0)
+            n = np.arange(len(t))
+            #mean = np.array(n).astype('float')
+            #mean.fill(np.asscalar(mean_val))
+            print(mean_val)
+            print(min)
+        
+        window = 100
+        mean = moving_average(t, window)
+        plt.figure()
+        plt.plot(n, t)
+        plt.plot(n[window-1:], mean, 'r')
+        #plt.fill_between(frames,mean-std,mean+std, color=(1,0,0,0.2))
+        plt.legend(['Actual', 'MA(100)'])
+        plt.xlabel('frame (640x480)')
+        plt.ylabel('time (s)')
+        plt.title('Python OpenCV Registration Time')
+        plt.show()
+    elif (perf_type == 'ndvimap'):
+        with open(f_path, 'rb') as f:
+            r = np.asarray(pickle.load(f))
+            t = r.T[1].flatten().T
+            mean_val = np.mean(t, axis=0)
+            min = np.min(t, axis=0)
+            std = np.std(t, axis=0)
+            n = np.arange(len(t))
+            #mean = np.array(n).astype('float')
+            #mean.fill(np.asscalar(mean_val))
+            print(mean_val)
+            print(min)
+        
+        window = 100
+        mean = moving_average(t, window)
+        plt.figure()
+        plt.plot(n, t)
+        plt.plot(n[window-1:], mean, 'r')
+        #plt.fill_between(frames,mean-std,mean+std, color=(1,0,0,0.2))
+        plt.legend(['Actual', 'MA(100)'])
+        plt.xlabel('frame (640x480)')
+        plt.ylabel('time (s)')
+        plt.title('Python NDVI Mapping Time')
+        plt.show()
     else:
         print('Performance type not specified or supported.')
     
     return
 
-# channelSplit()
-# to get BGR values from a cv2 image
-def channelSplit(image):
-    return np.dsplit(image,image.shape[-1])
+    
+def moving_average(data_set, periods=3):
+    weights = np.ones(periods) / periods
+    return np.convolve(data_set, weights, mode='valid')
 
+    
 # showImage()
 # shows img for t time (in ms)
 #
