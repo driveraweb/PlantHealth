@@ -1,6 +1,7 @@
 from PIL import Image
 import numpy as np
 import numexpr as ne
+import datetime
 #import picamera
 import scipy
 import cv2
@@ -92,6 +93,42 @@ def ndvi_map(red_img, nir_img):
     return CMAP[idx]
  
  
+# process_snapshot()
+def process_snapshot(im_path, imRef_path):
+    """
+    ndvi_map()
+    [Description]
+    
+    Paramters:  
+    
+    Preconditions:  CMAP is global and contains RGB values index by 
+                    NDVI in range [0,255]
+    
+    Postconditions:  
+    
+    Returns:  
+    """
+    # Open Images
+    imRef = cv2.imread(imRefPath, cv2.IMREAD_COLOR)
+    im = cv2.imread('../Images/NGB.png', cv2.IMREAD_COLOR)
+    
+    # Registered image will be restored in imReg. 
+    # The estimated homography will be stored in h
+    imReg = alignImages(im, imRef)
+    
+    # Extract pertinent info
+    [_, _, Rimg] = cv2.split(imRef)
+    [_, _, NIRimg] = cv2.split(imReg)
+ 
+    # Generate NDVI image
+    NDVIimg = ndvi_map(Rimg, NIRimg)
+    
+    # Save NDVI Image
+    t = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    out_path = "~/PlantHealth/SavedImages/ndvi"+t+".jpg"
+    cv2.imwrite(out_path, imReg)
+
+
  
 # capture_image()
 # requires a camera setup with:
