@@ -2,7 +2,6 @@ import numpy as np
 
 MAX_FEATURES = 500
 GOOD_MATCH_PERCENT = .04
-global CMAP 
 global H
 H = np.asarray([[  9.80667346e-01,   1.26994766e-02,   1.78365943e+01],
        [ -4.96549469e-02,   1.01925158e+00,   2.79901091e+01],

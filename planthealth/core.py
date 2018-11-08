@@ -30,6 +30,9 @@ def alignImages(im1, im2):
     
     Returns:  
     """
+    global MAX_FEATURES
+    global GOOD_MATCH_PERCENT
+    
     # Detect ORB features and compute descriptors.
     orb = cv2.ORB_create(MAX_FEATURES)
     keypoints1, descriptors1 = orb.detectAndCompute(im1, None)
@@ -85,7 +88,7 @@ def ndvi_map(red_img, nir_img):
     
     Returns:  
     """
-    
+    global CMAP
     #calculate NDVI values pixel-wise and scale to 0-255
     idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
     #idx = (((nir_img - red_img) / (nir_img+red_img) + 1)*128).astype('uint8')
@@ -108,9 +111,15 @@ def process_snapshot(im_path, imRef_path):
     
     Returns:  
     """
+    global MAX_FEATURES
+    global GOOD_MATCH_PERCENT
+    last_MAX_FEATURES = MAX_FEATURES
+    MAX_FEATURES=1500
+    last_GOOD_MATCH_PERCENT = GOOD_MATCH_PERCENT
+    GOOD_MATCH_PERCENT = 0.02
     # Open Images
-    imRef = cv2.imread(imRefPath, cv2.IMREAD_COLOR)
-    im = cv2.imread('../Images/NGB.png', cv2.IMREAD_COLOR)
+    imRef = cv2.imread(imRef_path, cv2.IMREAD_COLOR)
+    im = cv2.imread(im_path, cv2.IMREAD_COLOR)
     
     # Registered image will be restored in imReg. 
     # The estimated homography will be stored in h
@@ -118,16 +127,19 @@ def process_snapshot(im_path, imRef_path):
     
     # Extract pertinent info
     [_, _, Rimg] = cv2.split(imRef)
-    [_, _, NIRimg] = cv2.split(imReg)
+    [_, _,NIRimg] = cv2.split(imReg)
  
     # Generate NDVI image
     NDVIimg = ndvi_map(Rimg, NIRimg)
     
     # Save NDVI Image
     t = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    out_path = "~/PlantHealth/SavedImages/ndvi"+t+".jpg"
-    cv2.imwrite(out_path, imReg)
+    out_path = "PlantHealth/SavedImages/ndvi"+t+".jpg"
+    print('Writing file to: ', out_path)
+    cv2.imwrite(out_path, NDVIimg)
 
+    MAX_FEATURES=last_MAX_FEATURES
+    GOOD_MATCH_PERCENT = last_MAX_FEATURES
 
  
 # capture_image()
