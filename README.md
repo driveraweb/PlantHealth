@@ -65,6 +65,7 @@ pip install -r requirements.txt
 
 This is where we add additional notes about how to deploy this on a live system
 
+* Install Raspbian Jessie
 * Enable Pi Camera
 * Enable I2C
 * In */boot/conf.txt* append:
