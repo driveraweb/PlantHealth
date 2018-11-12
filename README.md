@@ -67,11 +67,11 @@ This is where we add additional notes about how to deploy this on a live system
 
 * Enable Pi Camera
 * Enable I2C
-* In /boot/conf.txt append:
+* In */boot/conf.txt* append:
 ```
-max_usb_current = 1
-hdmi_group=2
-hdmi_mode = 1
+  max_usb_current = 1
+  hdmi_group=2
+  hdmi_mode = 1
 hdmi_cvt 1024 600 60 6 0 0 0
 ```
 
