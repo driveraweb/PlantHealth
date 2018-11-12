@@ -56,6 +56,8 @@ pip install -r requirements.txt
 
 [Install picamera](https://github.com/waveform80/picamera) 
 
+[Install numpy with this method](https://hunseblog.wordpress.com/2014/09/15/installing-numpy-and-openblas/) 
+
 [Install OpenCV for C++](https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html)
 
 
