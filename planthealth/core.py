@@ -7,6 +7,10 @@ import scipy
 import cv2
 import os
 from config import *
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(37, GPIO.OUT)
+GPIO.setup(38, GPIO.OUT)
 
 #cython stuff
 #cimport numpy as np
@@ -14,6 +18,24 @@ from config import *
 #ctypedef np.int_t DTYPE_t
 
 ### FUNCTIONS USED FOR NDVI IMAGE PROCESSING AND USER INTERFACE ###
+
+#lamps()
+def lamps(val):
+    """
+    lamps()
+    [Description]
+    
+    Paramters:  val - GPIO.HIGH or 1to turn lamps on
+                                  GPIO.LOW or 0 to turn lamps off
+    
+    Preconditions:  
+    
+    Postconditions: The lamps are turned on or off  
+    
+    Returns:  
+    """
+    GPIO.output(37, val)
+    GPIO.output(38,val)
 
 #alignImages()
 def alignImages(im1, im2):
