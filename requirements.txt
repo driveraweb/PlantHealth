@@ -6,7 +6,7 @@ numpy
 numexpr
 matplotlib
 cython
-picamera
+picamera[array]
 pillow
 opencv-python
 scikit-image

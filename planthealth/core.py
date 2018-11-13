@@ -2,7 +2,8 @@ from PIL import Image
 import numpy as np
 import numexpr as ne
 import datetime
-#import picamera
+import picamera
+from picamera.array import PiRGBArray
 import scipy
 import cv2
 import os
@@ -11,6 +12,7 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(37, GPIO.OUT)
 GPIO.setup(38, GPIO.OUT)
+GPIO.setwarnings(False)
 
 #cython stuff
 #cimport numpy as np
@@ -54,6 +56,8 @@ def alignImages(im1, im2):
     """
     global MAX_FEATURES
     global GOOD_MATCH_PERCENT
+    print('Max features', MAX_FEATURES)
+    print('Using % good', GOOD_MATCH_PERCENT)
     
     # Detect ORB features and compute descriptors.
     orb = cv2.ORB_create(MAX_FEATURES)
@@ -64,7 +68,7 @@ def alignImages(im1, im2):
     matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
     matches = matcher.match(descriptors1, descriptors2, None)
 
-    # Sort matches by score.
+    # Sort matches by likelihood of being a match.
     matches.sort(key=lambda x: x.distance, reverse=False)
 
     # Remove not so good matches.
@@ -72,8 +76,10 @@ def alignImages(im1, im2):
     matches = matches[:numGoodMatches]
 
     # Draw top matches.
-    #imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
-    #cv2.imwrite("../Images/matches.jpg", imMatches)
+    imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
+    #cv2.imshow('Matches', imMatches)
+    #cv2.waitKey(2000)
+    cv2.imwrite("../SavedImages/matches.jpg", imMatches)
     
     # Extract location of good matches.
     points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -85,7 +91,12 @@ def alignImages(im1, im2):
 
     # Find homography.
     h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
-    print(np.array_repr(h))
+    if h is None:
+        global H
+        h = H
+        print('Unable to create homography matrix. Using general homography matrix')
+    else:
+        print(np.array_repr(h))
 
     # Use homography.
     height, width, channels = im2.shape
@@ -93,6 +104,24 @@ def alignImages(im1, im2):
 
     return im1Reg
 
+
+
+# imTranslation()
+def imTranslation(im, imRef):
+    """
+    alignImages()
+    [Description]
+    
+    Paramters:  
+    
+    Preconditions:  CMAP is global and contains RGB values index by 
+                    NDVI in range [0,255]
+    
+    Postconditions:  
+    
+    Returns:  
+    """
+    return
 
     
 # ndvi_map()
@@ -119,7 +148,7 @@ def ndvi_map(red_img, nir_img):
  
  
 # process_snapshot()
-def process_snapshot(im_path, imRef_path):
+def process_snapshot(im, imRef):
     """
     ndvi_map()
     [Description]
@@ -133,15 +162,15 @@ def process_snapshot(im_path, imRef_path):
     
     Returns:  
     """
-    global MAX_FEATURES
-    global GOOD_MATCH_PERCENT
-    last_MAX_FEATURES = MAX_FEATURES
-    MAX_FEATURES=1500
-    last_GOOD_MATCH_PERCENT = GOOD_MATCH_PERCENT
-    GOOD_MATCH_PERCENT = 0.02
-    # Open Images
-    imRef = cv2.imread(imRef_path, cv2.IMREAD_COLOR)
-    im = cv2.imread(im_path, cv2.IMREAD_COLOR)
+    #global MAX_FEATURES
+    #global GOOD_MATCH_PERCENT
+    #last_MAX_FEATURES = MAX_FEATURES
+    #MAX_FEATURES=1500
+    #last_GOOD_MATCH_PERCENT = GOOD_MATCH_PERCENT
+    #GOOD_MATCH_PERCENT = 0.04
+    # Open Images - should be replaced with arrays
+    #imRef = cv2.imread(imRef_path, cv2.IMREAD_COLOR)
+    #im = cv2.imread(im_path, cv2.IMREAD_COLOR)
     
     # Registered image will be restored in imReg. 
     # The estimated homography will be stored in h
@@ -154,26 +183,47 @@ def process_snapshot(im_path, imRef_path):
     # Generate NDVI image
     NDVIimg = ndvi_map(Rimg, NIRimg)
     
+    #show NDVI image
+    cv2.imshow('NDVI Snap', NDVIimg)
+    cv2.waitKey()
+    
     # Save NDVI Image
     t = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    out_path = "PlantHealth/SavedImages/ndvi"+t+".jpg"
-    print('Writing file to: ', out_path)
-    cv2.imwrite(out_path, NDVIimg)
+    out_path_NDVI = "../SavedImages/ndvi"+t+".jpg"
+    out_path_Ref = "../SavedImages/Ref"+t+".jpg"
+    print('Writing file to: ', out_path_NDVI, "and", out_path_Ref)
+    cv2.imwrite(out_path_NDVI, NDVIimg)
+    cv2.imwrite(out_path_Ref, imRef)
 
-    MAX_FEATURES=last_MAX_FEATURES
-    GOOD_MATCH_PERCENT = last_MAX_FEATURES
+    #MAX_FEATURES=last_MAX_FEATURES
+    #GOOD_MATCH_PERCENT = last_MAX_FEATURES
 
  
 # capture_image()
-# requires a camera setup with:
-#   resolution = (1920,1080)
-#   framerate = 24
-#   time.sleep(2)
+# requires:
+#   ivport MUX initialized
+#   a camera setup with:
+#     resolution = (1920,1088)
+#     framerate = 24
+#     time.sleep(2)
 def snapshot(camera):
-    img = np.empty((1080, 1920, 3), dtype=np.int8)
-    camera.capture(img, 'rgb')
-    return img
+    t = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    lamps(GPIO.HIGH)
+    #reference to camera capture
+    raw = PiRGBArray(camera) 
+    #get image from camera
+    camera.capture(raw, format='bgr')
+    print('Captured')
+    lamps(GPIO.LOW)
+    imRef = raw.array
+    
+    #save images
+    #cv2.imwrite("../SavedImages/Ref"+t+".jpg", imRef)
+    return imRef
  
+
+
+
  
  # ndvi_map()
  # using Cython
