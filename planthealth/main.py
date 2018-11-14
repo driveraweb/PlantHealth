@@ -10,23 +10,26 @@ import core
 
 def main(args):
     print("Main file running")
-    #initialize cameras
     camera = picamera.PiCamera()
-    camera.resolution = (640,480)
-    camera.framerate = 64
-    time.sleep(1)
-    iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
-    
-    print('Switching to RGB cam')
-    iv.camera_change(2) #start at RGB camera
-    print('Capturing RGB image')
-    imRef = core.snapshot(camera)
-    print('Switching to NoIR cam')
-    iv.camera_change(1) #get NIR image
-    print('Capturing NIR image')
-    imNIR = core.snapshot(camera)
-    print('Processing...')
-    core.process_snapshot(imNIR, imRef)
+    try:
+        #initialize cameras
+        camera.resolution = (640,480)
+        time.sleep(1)
+        iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
+        
+        print('Switching to RGB cam')
+        iv.camera_change(2) #start at RGB camera
+        print('Capturing RGB image')
+        imRef = core.snapshot(camera)
+        print('Switching to NoIR cam')
+        iv.camera_change(1) #get NIR image
+        print('Capturing NIR image')
+        imNIR = core.snapshot(camera)
+        print('Processing...')
+        core.process_snapshot(imNIR, imRef)
+        camera.close()
+    finally:
+        camera.close()
     
     #code for main program
 

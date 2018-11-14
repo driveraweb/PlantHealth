@@ -148,7 +148,7 @@ def ndvi_map(red_img, nir_img):
  
  
 # process_snapshot()
-def process_snapshot(im_path, imRef_path):
+def process_snapshot(im, imRef):
     """
     ndvi_map()
     [Description]
@@ -169,8 +169,8 @@ def process_snapshot(im_path, imRef_path):
     #last_GOOD_MATCH_PERCENT = GOOD_MATCH_PERCENT
     #GOOD_MATCH_PERCENT = 0.04
     # Open Images - should be replaced with arrays
-    imRef = cv2.imread(imRef_path, cv2.IMREAD_COLOR)
-    im = cv2.imread(im_path, cv2.IMREAD_COLOR)
+    #imRef = cv2.imread(imRef_path, cv2.IMREAD_COLOR)
+    #im = cv2.imread(im_path, cv2.IMREAD_COLOR)
     
     # Registered image will be restored in imReg. 
     # The estimated homography will be stored in h
