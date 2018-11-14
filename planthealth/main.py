@@ -1,6 +1,7 @@
 import argparse
 import wx
 import picamera
+import time
 import sys
 sys.path.append('../../Downloads/ivport-v2')
 import ivport
@@ -11,8 +12,9 @@ def main(args):
     print("Main file running")
     #initialize cameras
     camera = picamera.PiCamera()
-    camera.resolution = (1920,1088)
-    camera.framerate = 1
+    camera.resolution = (640,480)
+    camera.framerate = 64
+    time.sleep(1)
     iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
     
     print('Switching to RGB cam')
