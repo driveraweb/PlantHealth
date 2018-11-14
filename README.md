@@ -38,6 +38,22 @@ This software was designed and implemented using the following hardware:
 
 
 
+## Deployment
+
+This is where we add additional notes about how to deploy this on a live system
+
+* Install Raspbian Jessie
+* Enable Pi Camera
+* Enable I2C
+* In */boot/conf.txt* append:
+```
+    max_usb_current = 1
+    hdmi_group=2
+    hdmi_mode = 1
+    hdmi_cvt 1024 600 60 6 0 0 0
+```
+
+
 ### Installing Software
 
 A step-by-step series that tells you how to get a Plant Health imaging software running
@@ -56,13 +72,9 @@ pip install -r requirements.txt
 
 [Install picamera](https://github.com/waveform80/picamera) 
 
+[Install numpy with this method](https://hunseblog.wordpress.com/2014/09/15/installing-numpy-and-openblas/) 
+
 [Install OpenCV for C++](https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html)
-
-
-## Deployment
-
-This is where we add additional notes about how to deploy this on a live system
-
 
 
 ## Built With
