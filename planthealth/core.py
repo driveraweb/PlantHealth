@@ -185,15 +185,17 @@ def process_snapshot(im, imRef):
     
     #show NDVI image
     cv2.imshow('NDVI Snap', NDVIimg)
-    cv2.waitKey()
+    cv2.waitKey(300)
     
     # Save NDVI Image
     t = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    out_path_NDVI = "../SavedImages/ndvi"+t+".jpg"
-    out_path_Ref = "../SavedImages/Ref"+t+".jpg"
-    print('Writing file to: ', out_path_NDVI, "and", out_path_Ref)
+    out_path_NDVI = "../SavedImages/"+t+"_ndvi.jpg"
+    out_path_Ref = "../SavedImages/"+t+"_Ref.jpg"
+    out_path_im = "../SavedImages/"+t+"_im.jpg"
+    print('Writing file to: ', out_path_NDVI)
     cv2.imwrite(out_path_NDVI, NDVIimg)
     cv2.imwrite(out_path_Ref, imRef)
+    cv2.imwrite(out_path_im, im)
 
     #MAX_FEATURES=last_MAX_FEATURES
     #GOOD_MATCH_PERCENT = last_MAX_FEATURES
