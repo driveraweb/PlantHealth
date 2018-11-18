@@ -18,7 +18,7 @@ def main(args):
         iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
         
         print('Switching to RGB cam')
-        iv.camera_change(2) #start at RGB camera
+        iv.camera_change(3) #start at RGB camera
         print('Capturing RGB image')
         imRef = core.snapshot(camera)
         print('Switching to NoIR cam')

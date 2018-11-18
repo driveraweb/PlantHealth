@@ -141,7 +141,10 @@ def ndvi_map(red_img, nir_img):
     """
     global CMAP
     #calculate NDVI values pixel-wise and scale to 0-255
-    idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
+    ndvi = ne.evaluate("(nir_img - red_img) / (nir_img+red_img)")
+    min_ndvi = np.min(ndvi)
+    idx = ne.evaluate("((ndvi - min_ndvi)*128)").astype('uint8')
+    #idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) - min_ndvi)*128)").astype('uint8')
     #idx = (((nir_img - red_img) / (nir_img+red_img) + 1)*128).astype('uint8')
 
     return CMAP[idx]
