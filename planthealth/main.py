@@ -7,26 +7,24 @@ sys.path.append('../../Downloads/ivport-v2')
 import ivport
 from config import *
 import core
+from gui import *
 
 def main(args):
     print("Main file running")
+    iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
     camera = picamera.PiCamera()
     try:
-        #initialize cameras
+        #Initialize cameras
         camera.resolution = (640,480)
-        time.sleep(1)
-        iv = ivport.IVPort(ivport.TYPE_QUAD2, iv_jumper='A')
+
+        #Start the application
+        app = wx.App()  # create application object
+        frame = MainWindow(parent=None, title="NDVI Camera Suite", camera=camera, iv=iv)   # establish current frame
+        app.MainLoop()  # enters main loop
         
-        print('Switching to RGB cam')
-        iv.camera_change(3) #start at RGB camera
-        print('Capturing RGB image')
-        imRef = core.snapshot(camera)
-        print('Switching to NoIR cam')
-        iv.camera_change(1) #get NIR image
-        print('Capturing NIR image')
-        imNIR = core.snapshot(camera)
-        print('Processing...')
-        core.process_snapshot(imNIR, imRef)
+
+        
+
         camera.close()
     finally:
         camera.close()

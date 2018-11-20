@@ -187,8 +187,8 @@ def process_snapshot(im, imRef):
     NDVIimg = ndvi_map(Rimg, NIRimg)
     
     #show NDVI image
-    cv2.imshow('NDVI Snap', NDVIimg)
-    cv2.waitKey(300)
+    #cv2.imshow('NDVI Snap', NDVIimg)
+    #cv2.waitKey(300)
     
     # Save NDVI Image
     t = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -199,6 +199,8 @@ def process_snapshot(im, imRef):
     cv2.imwrite(out_path_NDVI, NDVIimg)
     cv2.imwrite(out_path_Ref, imRef)
     cv2.imwrite(out_path_im, im)
+    
+    return NDVIimg
 
     #MAX_FEATURES=last_MAX_FEATURES
     #GOOD_MATCH_PERCENT = last_MAX_FEATURES
@@ -218,8 +220,8 @@ def snapshot(camera):
     raw = PiRGBArray(camera) 
     #get image from camera
     camera.capture(raw, format='bgr')
-    print('Captured')
     lamps(GPIO.LOW)
+    print('Captured')
     imRef = raw.array
     
     #save images
