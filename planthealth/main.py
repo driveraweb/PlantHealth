@@ -3,7 +3,7 @@ import wx
 import picamera
 import time
 import sys
-sys.path.append('../../Downloads/ivport-v2')
+sys.path.append('/home/pi/Downloads/ivport-v2')
 import ivport
 from config import *
 import core

@@ -79,7 +79,7 @@ def alignImages(im1, im2):
     imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
     #cv2.imshow('Matches', imMatches)
     #cv2.waitKey(2000)
-    cv2.imwrite("../SavedImages/matches.jpg", imMatches)
+    cv2.imwrite("/home/pi/PlantHealth/SavedImages/matches.jpg", imMatches)
     
     # Extract location of good matches.
     points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -192,15 +192,15 @@ def process_snapshot(im, imRef):
     
     # Save NDVI Image
     t = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    out_path_NDVI = "../SavedImages/"+t+"_ndvi.jpg"
-    out_path_Ref = "../SavedImages/"+t+"_Ref.jpg"
-    out_path_im = "../SavedImages/"+t+"_im.jpg"
+    out_path_NDVI = "/home/pi/PlantHealth/SavedImages/"+t+"_ndvi.jpg"
+    out_path_Ref = "/home/pi/PlantHealth/SavedImages/"+t+"_Ref.jpg"
+    out_path_im = "/home/pi/PlantHealth/SavedImages/"+t+"_im.jpg"
     print('Writing file to: ', out_path_NDVI)
     cv2.imwrite(out_path_NDVI, NDVIimg)
     cv2.imwrite(out_path_Ref, imRef)
     cv2.imwrite(out_path_im, im)
     
-    return NDVIimg
+    return NDVIimg#, t
 
     #MAX_FEATURES=last_MAX_FEATURES
     #GOOD_MATCH_PERCENT = last_MAX_FEATURES
@@ -214,8 +214,7 @@ def process_snapshot(im, imRef):
 #     framerate = 24
 #     time.sleep(2)
 def snapshot(camera):
-    t = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    lamps(GPIO.HIGH)
+    #lamps(GPIO.HIGH)
     #reference to camera capture
     raw = PiRGBArray(camera) 
     #get image from camera
@@ -225,7 +224,6 @@ def snapshot(camera):
     imRef = raw.array
     
     #save images
-    #cv2.imwrite("../SavedImages/Ref"+t+".jpg", imRef)
     return imRef
  
 

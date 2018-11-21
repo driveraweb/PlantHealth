@@ -7,11 +7,11 @@
 #
 
 #initialize MUX
-python3 ../../Downloads/ivport-v2/init_ivport.py& 
-sleep 0.5s #wait for connection
+python3 /home/pi/Downloads/ivport-v2/init_ivport.py 
+sleep 2s #wait for connection
 
 #show MUX and PiCamera addresses
 i2cdetect -y 1
 
 #run main program
-python3 ../planthealth/main.py 
+python3 /home/pi/PlantHealth/planthealth/main.py 
