@@ -29,15 +29,7 @@ def main(args):
     finally:
         print('Exiting Program')
         camera.close()
-        exit()
-    
-    #code for main program
-
-    #app = wx.App()
-    #frame = wx.Frame(None, title='Simple Application')
-    #frame.Show()
-    # app.MainLoop()
-    
+        exit()  
 
 
 if __name__ == '__main__':

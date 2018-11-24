@@ -2,6 +2,7 @@ from PIL import Image
 import numpy as np
 import numexpr as ne
 import datetime
+import sys
 import picamera
 from picamera.array import PiRGBArray
 import scipy
@@ -9,10 +10,16 @@ import cv2
 import os
 from config import *
 import RPi.GPIO as GPIO
+import threading
+import wx
+from config import NDVI_VID, NO_VID, VIS_VID
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(37, GPIO.OUT)
 GPIO.setup(38, GPIO.OUT)
 GPIO.setwarnings(False)
+global MAX_FEATURES
+global GOOD_MATCH_PERCENT
+global H
 
 #cython stuff
 #cimport numpy as np
@@ -54,10 +61,10 @@ def alignImages(im1, im2):
     
     Returns:  
     """
-    global MAX_FEATURES
-    global GOOD_MATCH_PERCENT
-    print('Max features', MAX_FEATURES)
-    print('Using % good', GOOD_MATCH_PERCENT)
+    #adjust max_features and good_match_percents
+    #print('Max features', MAX_FEATURES)
+    #print('Using % good', GOOD_MATCH_PERCENT)
+    print('Saved Homography:', H)
     
     # Detect ORB features and compute descriptors.
     orb = cv2.ORB_create(MAX_FEATURES)
@@ -89,18 +96,19 @@ def alignImages(im1, im2):
         points1[i, :] = keypoints1[match.queryIdx].pt
         points2[i, :] = keypoints2[match.trainIdx].pt
 
-    # Find homography. NEED TO ADD A TRY AND EXCEPT HERE************************
-    h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
-    if h is None:
-        global H
-        h = H
-        print('Unable to create homography matrix. Using general homography matrix')
-    else:
-        print(np.array_repr(h))
-
-    # Use homography.
-    height, width, channels = im2.shape
-    im1Reg = cv2.warpPerspective(im1, h, (width, height))
+    # Find homography. 
+    try:
+        h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
+    except:
+        h = H #using stored homography
+        print('Using saved homography h:', h)
+    finally:
+        # Use homography.
+        if h is None:
+            h = H
+            print('Using saved homography h:', h)
+        height, width, channels = im2.shape
+        im1Reg = cv2.warpPerspective(im1, h, (width, height))
 
     return im1Reg
 
@@ -221,33 +229,68 @@ def snapshot(camera):
         #get image from camera
         camera.capture(raw, format='bgr')
         lamps(GPIO.LOW)
-        print('Captured')
+        #print('Captured')
         imRef = raw.array
     #save images
     return imRef
  
 
-# geet_frame()
+# get_frame()
 #    pirgbarray must be set up with camera
-def get_frame(camera, pirgbarray):
+def get_frame(camera, pirgbarray, fmt='bgr'):
     #lamps(GPIO.HIGH)
     #get image from camera
-    camera.capture(pirgbarray, format='bgr', use_video_port=True)
+    camera.capture(pirgbarray, format=fmt, use_video_port=True)
     lamps(GPIO.LOW)
     img = pirgbarray.array
     pirgbarray.truncate(0) #clear stream
     return img
 
+
+#Class VisVideo()
+#
+class VisVideo(threading.Thread):
+    
+    def __init__(self, gui):
+        self.gui = gui
+        threading.Thread.__init__(self) 
+        self.daemon = True #allows exiting program if thread is running
+        self.start()
+        
+    def run(self):
+        print('Running video thread')
+        self.gui.iv.camera_change(3) #RGB camera
+        with picamera.array.PiRGBArray(self.gui.camera) as frame:
+            while self.gui.VidMode == VIS_VID:
+                self.gui.img = get_frame(self.gui.camera, frame, 'rgb')
+                self.gui.frame_ready = True
+                #print('Frame is ready')
+        print('End of VIS video')
+        return
  
- # ndvi_map()
- # using Cython
- # def ndvi_map_c(np.ndarray red_img, np.ndarray nir_img):
-    # """uses cython for performance"""
-    # assert red_img.dtype == DTYPE and nir_img.dtype = DTYPE
+ 
+#Class NDVIVideo()
+#
+class NDVIVideo(threading.Thread):
     
-    # cdef np.ndarray ndvi_img = np.empty_like(red_img, dtype=np.int8)
-    # cdef np.ndarray ndvi = np.empty_like(red_img)
-    # cdef np.ndarray denom = np.empty_like(red_img)
-    # cdef float min_ndvi
-    
-    
+    def __init__(self, gui):
+        self.gui = gui
+        threading.Thread.__init__(self) 
+        self.daemon = True #allows exiting program if thread is running
+        self.start()
+        
+    def run(self):
+        print('Running NDVI video thread')
+        while self.gui.VidMode == NDVI_VID:
+            with picamera.array.PiRGBArray(self.gui.camera) as frame:
+                self.gui.iv.camera_change(1) #start at NIR camera
+                im = get_frame(self.gui.camera, frame)
+            print('got nir frame')
+            with picamera.array.PiRGBArray(self.gui.camera) as frame:
+                self.gui.iv.camera_change(3) #get RGB image
+                imRef = get_frame(self.gui.camera, frame)
+            self.gui.img = ndvi_map(alignImages(im, imRef))
+            self.gui.frame_ready = True
+            print('Frame is ready')
+        return
+

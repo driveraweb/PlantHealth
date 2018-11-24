@@ -9,6 +9,7 @@ import ivport #for camera MUX
 import core     # import dsp code
 import cv2
 import time
+from config import NDVI_VID, NO_VID, VIS_VID, FRAMERATE
 
 
 #GUI CLASS DEFINITION
@@ -19,7 +20,15 @@ class MainWindow(wx.Frame):
         self.Center()       # centers current frame
         
         #NDVI Video State
-        self.NDVIMode = True #start in NDVI video
+        self.img = None #numpy array
+        self.vid = None 
+        self.frame_ready = False
+        self.VidMode = NDVI_VID #start in NDVI video
+        
+        #timer for video frames
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        self.timer.Start(30)
         
         #initialize camera and MUX
         if camera is None:
@@ -27,6 +36,7 @@ class MainWindow(wx.Frame):
             exit()
         else:
             self.camera = camera
+            self.camera.framerate = FRAMERATE
         if iv is None:
             print('Cannot run program. No MUX initialized.')
             exit()
@@ -56,7 +66,7 @@ class MainWindow(wx.Frame):
         self.b_ndvi.Bind(wx.EVT_BUTTON, self.NDVI_Video)
 
         #Capture/Delete Button
-        self.b_cap = wx.Button(self, -1, 'Capture\nImage')
+        self.b_cap = wx.Button(self, -1, 'Capture\nNDVI\nImage')
         self.b_cap.Bind(wx.EVT_BUTTON, self.Capture)
         
         # add space to box
@@ -79,6 +89,8 @@ class MainWindow(wx.Frame):
 
 
     def Capture(self, event=None):
+        self.VidMode = NO_VID
+        self.camera.framerate = FRAMERATE
         print('Switching to RGB cam')
         self.iv.camera_change(3) #start at RGB camera
         print('Capturing RGB image')
@@ -89,19 +101,21 @@ class MainWindow(wx.Frame):
         imNIR = core.snapshot(self.camera)
         print('Processing...')
         NDVIimg, self.lastCapTime = core.process_snapshot(imNIR, imRef)
+        self.img = NDVIimg
         #print(repr(NDVIimg))
             
         #update button
         self.b_cap.SetLabelText('Delete\nImage')
         self.b_cap.Bind(wx.EVT_BUTTON, self.DeleteImage)
         
-        self.LoadImage(NDVIimg) #load image refreshes button
+        self.LoadImage() #load image refreshes button
 
 
-    def LoadImage(self, img):
+    def LoadImage(self):
+        #print('Loading Image')
         # convert img to wx.Image
-        H, W, n = img.shape
-        IMG = wx.Image(W, H, img)
+        H, W, n = self.img.shape
+        IMG = wx.Image(W, H, self.img)
         #IMG = IMG.Scale(640, 480) 
 
         # convert it to a wx.Bitmap and put it on the wx.StaticBitmap
@@ -122,48 +136,38 @@ class MainWindow(wx.Frame):
         self.b_cap.SetLabelText('Capture\nImage')
         self.b_cap.Bind(wx.EVT_BUTTON, self.Capture)
             
-        self.Refresh()
-       
-       
-    def LoadFrame(self, img):
-        # convert img to wx.Image
-        H, W, n = img.shape
-        IMG = wx.Image(W, H, img)
-        #IMG = IMG.Scale(640, 480) 
-
-        # convert it to a wx.Bitmap and put it on the wx.StaticBitmap
-        self.Image.SetBitmap(wx.Bitmap(IMG))
-            
-        self.Refresh() #load frame
-        
-        #self.VIS_frame() #get next
-    
-    
-    def VIS_frame(self, event=None):
-        self.iv.camera_change(3) #use RGB camera
-        with picamera.array.PiRGBArray(self.camera) as frame:
-            img = core.get_frame(self.camera, frame)
-            self.LoadFrame(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    
-    
-    def NDVI_frame(self, event=None):
-        return
+        self.NDVI_Video()
     
         
     def NDVI_Video(self, event=None):
-        if self.NDVIMode:
+        #make sure catpture button is in capture mode - resets on next frame
+        self.b_cap.SetLabelText('Capture\nNDVI\nImage')
+        self.b_cap.Bind(wx.EVT_BUTTON, self.Capture)
+        
+        if self.VidMode != VIS_VID:
             print("Entering VIS Camera mode")
-            self.NDVIMode = False
-            while not self.NDVIMode:
-                self.VIS_frame()
-                time.sleep(500)
+            #if self.vid is not None:
+            #    self.vid.stop()
+            self.VidMode = VIS_VID
+            self.camera.framerate = FRAMERATE
+            self.vid = core.VisVideo(self)
         else:
             print("Entering NDVI Video mode")
-            self.NDVIMode=True
-            self.NDVI_frame()
+            #if self.vid is not None:
+            #    self.vid.stop()
+            self.VidMode = NDVI_VID
+            self.camera.framerate = 90
+            core.NDVIVideo(self)
+            self.camera.framerate = FRAMERATE
         
 
-
+    def on_timer(self, event=None):
+        #print("Timer event")
+        if self.frame_ready:
+            self.frame_ready = False
+            self.LoadImage()
+            
+            
     def OnAbout(self, e):
         # creates message dialog box with an OK button
         DLG = wx.MessageDialog(self, "Real-time NDVI video and NDVI image"
@@ -174,6 +178,7 @@ class MainWindow(wx.Frame):
 
     def OnExit(self, e):
         # closes the application frame
+        self.vid.stop()
         self.Close(True)
 
 
