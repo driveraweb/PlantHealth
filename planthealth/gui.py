@@ -7,6 +7,8 @@ import wx   # import wx Python
 import picamera     # import pi camera modules
 import ivport #for camera MUX
 import core     # import dsp code
+import cv2
+import time
 
 
 #GUI CLASS DEFINITION
@@ -15,6 +17,9 @@ class MainWindow(wx.Frame):
     def __init__(self,parent,title='NDVI', camera=None, iv=None):
         frame = wx.Frame.__init__(self, parent, title=title, size=(1024, 490))
         self.Center()       # centers current frame
+        
+        #NDVI Video State
+        self.NDVIMode = True #start in NDVI video
         
         #initialize camera and MUX
         if camera is None:
@@ -46,24 +51,22 @@ class MainWindow(wx.Frame):
         self.Image = wx.StaticBitmap(self, bitmap=wx.Bitmap(640, 480))
         # ***need code for active camera feed and a condition if image is taken***
         
-        #Delete Button
-        b_del = wx.Button(self, -1, 'Delete Image')
-        b_del.Bind(wx.EVT_BUTTON, self.DeleteImage)
-        
-        #Video Button
-        b_vid = wx.Button(self, -1, 'Video Mode')
-        b_vid.Bind(wx.EVT_BUTTON, self.Video)
+        #Toggle NDVI Video Button
+        self.b_ndvi = wx.Button(self, -1, 'Toggle\nNDVI\nVideo')
+        self.b_ndvi.Bind(wx.EVT_BUTTON, self.NDVI_Video)
 
-        #Capture Button
-        b_cap = wx.Button(self, -1, 'Capture Image')
-        b_cap.Bind(wx.EVT_BUTTON, self.Capture)
+        #Capture/Delete Button
+        self.b_cap = wx.Button(self, -1, 'Capture\nImage')
+        self.b_cap.Bind(wx.EVT_BUTTON, self.Capture)
         
         # add space to box
-        box = wx.BoxSizer(wx.VERTICAL)
-        box.Add((1,1),1)
-        box.Add(self.Image, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL | wx.ADJUST_MINSIZE, 10)
-        box.Add((1,1),1)
-        box.Add(b_cap, 0, wx.Center | wx.ALL, 10)
+        box = wx.BoxSizer(wx.HORIZONTAL)
+        box.Add(self.Image, 0, wx.ALIGN_TOP|wx.ALIGN_LEFT|wx.ALL|wx.ADJUST_MINSIZE, 10)
+        #box.Add((30,100),1)
+        flags = wx.SizerFlags(1)
+        flags.Border(wx.ALL, 10)
+        box.Add(self.b_ndvi, flags.Right().Center())#.Expand())
+        box.Add(self.b_cap, flags.Right().Center())#.Expand())
         self.SetSizerAndFit(box)
 
         # set events
@@ -85,35 +88,80 @@ class MainWindow(wx.Frame):
         print('Capturing NIR image')
         imNIR = core.snapshot(self.camera)
         print('Processing...')
-        NDVIimg = core.process_snapshot(imNIR, imRef)
-        print(repr(NDVIimg))
-        self.LoadImage(NDVIimg)
-
-
-    def DeleteImage(self, t, event=None):
-        #delete image
-        return
+        NDVIimg, self.lastCapTime = core.process_snapshot(imNIR, imRef)
+        #print(repr(NDVIimg))
+            
+        #update button
+        self.b_cap.SetLabelText('Delete\nImage')
+        self.b_cap.Bind(wx.EVT_BUTTON, self.DeleteImage)
         
-        
-    def Video(self, t, event=None):
-        #delete image
-        return
+        self.LoadImage(NDVIimg) #load image refreshes button
+
 
     def LoadImage(self, img):
-        # load the image
-        #IMG = wx.Image("image.jpg", wx.BITMAP_TYPE_JPEG)
-
-        # scale the image and preserve the aspect ratio
-        n, W, H = img.shape
-        print(img.shape)
-        #W = img.GetWidth()
-        #H = img.GetHeight()
+        # convert img to wx.Image
+        H, W, n = img.shape
         IMG = wx.Image(W, H, img)
-        IMG = IMG.Scale(640, 480) 
+        #IMG = IMG.Scale(640, 480) 
 
         # convert it to a wx.Bitmap and put it on the wx.StaticBitmap
-        self.Image.SetBitmap(wx.Bitmap(img))
+        self.Image.SetBitmap(wx.Bitmap(IMG))
+            
+        self.Refresh() 
+    
+    
+    def DeleteImage(self, event=None):
+        #delete images
+        cmd = 'rm /home/pi/PlantHealth/SavedImages/'+self.lastCapTime
+        os.system(cmd+'_ndvi.jpg')
+        os.system(cmd+'_Ref.jpg')
+        os.system(cmd+'_im.jpg')
+        print('Finished deleting last capture.')
+          
+        #update button
+        self.b_cap.SetLabelText('Capture\nImage')
+        self.b_cap.Bind(wx.EVT_BUTTON, self.Capture)
+            
         self.Refresh()
+       
+       
+    def LoadFrame(self, img):
+        # convert img to wx.Image
+        H, W, n = img.shape
+        IMG = wx.Image(W, H, img)
+        #IMG = IMG.Scale(640, 480) 
+
+        # convert it to a wx.Bitmap and put it on the wx.StaticBitmap
+        self.Image.SetBitmap(wx.Bitmap(IMG))
+            
+        self.Refresh() #load frame
+        
+        #self.VIS_frame() #get next
+    
+    
+    def VIS_frame(self, event=None):
+        self.iv.camera_change(3) #use RGB camera
+        with picamera.array.PiRGBArray(self.camera) as frame:
+            img = core.get_frame(self.camera, frame)
+            self.LoadFrame(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    
+    
+    def NDVI_frame(self, event=None):
+        return
+    
+        
+    def NDVI_Video(self, event=None):
+        if self.NDVIMode:
+            print("Entering VIS Camera mode")
+            self.NDVIMode = False
+            while not self.NDVIMode:
+                self.VIS_frame()
+                time.sleep(500)
+        else:
+            print("Entering NDVI Video mode")
+            self.NDVIMode=True
+            self.NDVI_frame()
+        
 
 
     def OnAbout(self, e):
@@ -127,7 +175,6 @@ class MainWindow(wx.Frame):
     def OnExit(self, e):
         # closes the application frame
         self.Close(True)
-        exit()
 
 
     #def OnLoad(self, e):

@@ -89,7 +89,7 @@ def alignImages(im1, im2):
         points1[i, :] = keypoints1[match.queryIdx].pt
         points2[i, :] = keypoints2[match.trainIdx].pt
 
-    # Find homography.
+    # Find homography. NEED TO ADD A TRY AND EXCEPT HERE************************
     h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
     if h is None:
         global H
@@ -141,10 +141,10 @@ def ndvi_map(red_img, nir_img):
     """
     global CMAP
     #calculate NDVI values pixel-wise and scale to 0-255
-    ndvi = ne.evaluate("(nir_img - red_img) / (nir_img+red_img)")
-    min_ndvi = np.min(ndvi)
-    idx = ne.evaluate("((ndvi - min_ndvi)*128)").astype('uint8')
-    #idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) - min_ndvi)*128)").astype('uint8')
+    #ndvi = ne.evaluate("(nir_img - red_img) / (nir_img+red_img)")
+    #min_ndvi = np.min(ndvi)
+    #idx = ne.evaluate("((ndvi - min_ndvi)*128)").astype('uint8')
+    idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
     #idx = (((nir_img - red_img) / (nir_img+red_img) + 1)*128).astype('uint8')
 
     return CMAP[idx]
@@ -200,7 +200,7 @@ def process_snapshot(im, imRef):
     cv2.imwrite(out_path_Ref, imRef)
     cv2.imwrite(out_path_im, im)
     
-    return NDVIimg#, t
+    return NDVIimg, t
 
     #MAX_FEATURES=last_MAX_FEATURES
     #GOOD_MATCH_PERCENT = last_MAX_FEATURES
@@ -216,18 +216,27 @@ def process_snapshot(im, imRef):
 def snapshot(camera):
     #lamps(GPIO.HIGH)
     #reference to camera capture
-    raw = PiRGBArray(camera) 
-    #get image from camera
-    camera.capture(raw, format='bgr')
-    lamps(GPIO.LOW)
-    print('Captured')
-    imRef = raw.array
-    
+    with PiRGBArray(camera) as raw:
+        raw = PiRGBArray(camera) 
+        #get image from camera
+        camera.capture(raw, format='bgr')
+        lamps(GPIO.LOW)
+        print('Captured')
+        imRef = raw.array
     #save images
     return imRef
  
 
-
+# geet_frame()
+#    pirgbarray must be set up with camera
+def get_frame(camera, pirgbarray):
+    #lamps(GPIO.HIGH)
+    #get image from camera
+    camera.capture(pirgbarray, format='bgr', use_video_port=True)
+    lamps(GPIO.LOW)
+    img = pirgbarray.array
+    pirgbarray.truncate(0) #clear stream
+    return img
 
  
  # ndvi_map()

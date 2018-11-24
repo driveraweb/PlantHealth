@@ -16,18 +16,20 @@ def main(args):
     try:
         #Initialize cameras
         camera.resolution = (640,480)
+        #get first capture
+        iv.camera_change(3)
+        core.snapshot(camera) 
 
         #Start the application
         app = wx.App()  # create application object
-        frame = MainWindow(parent=None, title="NDVI Camera Suite", camera=camera, iv=iv)   # establish current frame
+        # establish current frame
+        frame = MainWindow(parent=None, title="NDVI Camera Suite", camera=camera, iv=iv)   
         app.MainLoop()  # enters main loop
-        
-
-        
-
-        camera.close()
+        print('GUI closed')
     finally:
+        print('Exiting Program')
         camera.close()
+        exit()
     
     #code for main program
 
