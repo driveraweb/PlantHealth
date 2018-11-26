@@ -18,17 +18,16 @@ class MainWindow(wx.Frame):
     def __init__(self,parent,title='NDVI', camera=None, iv=None):
         frame = wx.Frame.__init__(self, parent, title=title, size=(1024, 490))
         self.Center()       # centers current frame
-        
+
         #NDVI Video State
         self.img = None #numpy array
-        self.vid = None 
         self.frame_ready = False
         self.VidMode = NDVI_VID #start in NDVI video
         
         #timer for video frames
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
-        self.timer.Start(30)
+        self.timer.Start(10)
         
         #initialize camera and MUX
         if camera is None:
@@ -57,9 +56,16 @@ class MainWindow(wx.Frame):
         menuBar.Append(filemenu, "&File")
         self.SetMenuBar(menuBar)
 
+        # create scale image field
+        img = cv2.imread('/home/pi/PlantHealth/scale.jpg')
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        h, w, n = img.shape
+        IMG = wx.Image(w, h, img)
+        self.ScaleImage = wx.StaticBitmap(self, bitmap=wx.Bitmap(w,h))
+        self.ScaleImage.SetBitmap(wx.Bitmap(IMG))
+        
         # create image field
         self.Image = wx.StaticBitmap(self, bitmap=wx.Bitmap(640, 480))
-        # ***need code for active camera feed and a condition if image is taken***
         
         #Toggle NDVI Video Button
         self.b_ndvi = wx.Button(self, -1, 'Toggle\nNDVI\nVideo')
@@ -71,8 +77,9 @@ class MainWindow(wx.Frame):
         
         # add space to box
         box = wx.BoxSizer(wx.HORIZONTAL)
+        box.Add(self.ScaleImage, 0, wx.ALIGN_TOP|wx.ALIGN_LEFT|wx.ALL|wx.ADJUST_MINSIZE, 10)
         box.Add(self.Image, 0, wx.ALIGN_TOP|wx.ALIGN_LEFT|wx.ALL|wx.ADJUST_MINSIZE, 10)
-        #box.Add((30,100),1)
+        
         flags = wx.SizerFlags(1)
         flags.Border(wx.ALL, 10)
         box.Add(self.b_ndvi, flags.Right().Center())#.Expand())
@@ -82,9 +89,8 @@ class MainWindow(wx.Frame):
         # set events
         self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
-        #self.Bind(wx.EVT_MENU, self.OnLoad, menuLoadImg)
         
-        self.Show()     # display current frame
+        self.Show() # display current frame
         self.Maximize(True)
 
 
@@ -156,9 +162,7 @@ class MainWindow(wx.Frame):
             #if self.vid is not None:
             #    self.vid.stop()
             self.VidMode = NDVI_VID
-            self.camera.framerate = 90
             core.NDVIVideo(self)
-            self.camera.framerate = FRAMERATE
         
 
     def on_timer(self, event=None):
@@ -178,8 +182,11 @@ class MainWindow(wx.Frame):
 
     def OnExit(self, e):
         # closes the application frame
-        self.vid.stop()
-        self.Close(True)
+        self.VidMode = NO_VID #to stop background threads
+        time.sleep(0.1)
+        
+        self.Close(True) #close app
+        
 
 
     #def OnLoad(self, e):

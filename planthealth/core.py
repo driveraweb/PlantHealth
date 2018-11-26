@@ -2,6 +2,7 @@ from PIL import Image
 import numpy as np
 import numexpr as ne
 import datetime
+import time
 import sys
 import picamera
 from picamera.array import PiRGBArray
@@ -240,10 +241,10 @@ def snapshot(camera):
 def get_frame(camera, pirgbarray, fmt='bgr'):
     #lamps(GPIO.HIGH)
     #get image from camera
+    pirgbarray.truncate(0) #clear stream
     camera.capture(pirgbarray, format=fmt, use_video_port=True)
     lamps(GPIO.LOW)
     img = pirgbarray.array
-    pirgbarray.truncate(0) #clear stream
     return img
 
 
@@ -258,13 +259,17 @@ class VisVideo(threading.Thread):
         self.start()
         
     def run(self):
+        time.sleep(0.5)
         print('Running video thread')
         self.gui.iv.camera_change(3) #RGB camera
         with picamera.array.PiRGBArray(self.gui.camera) as frame:
             while self.gui.VidMode == VIS_VID:
-                self.gui.img = get_frame(self.gui.camera, frame, 'rgb')
-                self.gui.frame_ready = True
-                #print('Frame is ready')
+                try:
+                    self.gui.img = get_frame(self.gui.camera, frame, 'rgb')
+                    self.gui.frame_ready = True
+                    #print('Frame is ready')
+                except:
+                    print('VIS frame error')
         print('End of VIS video')
         return
  
@@ -281,16 +286,35 @@ class NDVIVideo(threading.Thread):
         
     def run(self):
         print('Running NDVI video thread')
+        time.sleep(0.5)
         while self.gui.VidMode == NDVI_VID:
             with picamera.array.PiRGBArray(self.gui.camera) as frame:
-                self.gui.iv.camera_change(1) #start at NIR camera
-                im = get_frame(self.gui.camera, frame)
-            print('got nir frame')
+                try:
+                    self.gui.iv.camera_change(1) #start at NIR camera
+                    im = get_frame(self.gui.camera, frame)
+                except:
+                    im = None
+                    print('NDVI (NIR) frame error')
+            #print('got nir frame')
+            time.sleep(0.03)
+            #*****loop here  for some time******
             with picamera.array.PiRGBArray(self.gui.camera) as frame:
-                self.gui.iv.camera_change(3) #get RGB image
-                imRef = get_frame(self.gui.camera, frame)
-            self.gui.img = ndvi_map(alignImages(im, imRef))
-            self.gui.frame_ready = True
-            print('Frame is ready')
+                try:
+                    self.gui.iv.camera_change(3) #get RGB image
+                    imRef = get_frame(self.gui.camera, frame)
+                except:
+                    imRef = None
+                    print('NDVI (VIS) frame error')
+            
+            #process images
+            #imReg = alignImages(im, imRef)
+            if im is not None and imRef is not None:
+                height, width, channels = im.shape
+                imReg = cv2.warpPerspective(im, H, (width, height))
+                [_,_,NIR] = cv2.split(imReg)
+                [_,_,R] = cv2.split(imRef)
+                self.gui.img = ndvi_map(R, NIR)
+                self.gui.frame_ready = True
+            #print('Frame is ready')
         return
 

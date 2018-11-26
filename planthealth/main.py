@@ -19,13 +19,17 @@ def main(args):
         #get first capture
         iv.camera_change(3)
         core.snapshot(camera) 
-
+        print('Camera created')
         #Start the application
         app = wx.App()  # create application object
+        print('Application created')
         # establish current frame
-        frame = MainWindow(parent=None, title="NDVI Camera Suite", camera=camera, iv=iv)   
+        frame = MainWindow(parent=None, title="NDVI Camera Suite", camera=camera, iv=iv)  
+        print('Starting frame created') 
         app.MainLoop()  # enters main loop
         print('GUI closed')
+    except:
+        print('Problem setarting application')
     finally:
         print('Exiting Program')
         camera.close()
