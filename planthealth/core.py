@@ -20,7 +20,6 @@ GPIO.setup(38, GPIO.OUT)
 GPIO.setwarnings(False)
 global MAX_FEATURES
 global GOOD_MATCH_PERCENT
-global H
 
 #cython stuff
 #cimport numpy as np
@@ -65,7 +64,8 @@ def alignImages(im1, im2):
     #adjust max_features and good_match_percents
     #print('Max features', MAX_FEATURES)
     #print('Using % good', GOOD_MATCH_PERCENT)
-    print('Saved Homography:', H)
+    #GOOD_MATCH_PERCENT = 0.15
+    #print('Saved Homography:', H_SHORT)
     
     # Detect ORB features and compute descriptors.
     orb = cv2.ORB_create(MAX_FEATURES)
@@ -74,63 +74,52 @@ def alignImages(im1, im2):
 
     # Match features.
     matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
-    matches = matcher.match(descriptors1, descriptors2, None)
-
-    # Sort matches by likelihood of being a match.
-    matches.sort(key=lambda x: x.distance, reverse=False)
-
-    # Remove not so good matches.
-    numGoodMatches = int(len(matches) * GOOD_MATCH_PERCENT)
-    matches = matches[:numGoodMatches]
-
-    # Draw top matches.
-    imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
-    #cv2.imshow('Matches', imMatches)
-    #cv2.waitKey(2000)
-    cv2.imwrite("/home/pi/PlantHealth/SavedImages/matches.jpg", imMatches)
-    
-    # Extract location of good matches.
-    points1 = np.zeros((len(matches), 2), dtype=np.float32)
-    points2 = np.zeros((len(matches), 2), dtype=np.float32)
-
-    for i, match in enumerate(matches):
-        points1[i, :] = keypoints1[match.queryIdx].pt
-        points2[i, :] = keypoints2[match.trainIdx].pt
-
-    # Find homography. 
     try:
-        h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
+        matches = matcher.match(descriptors1, descriptors2, None)
     except:
-        h = H #using stored homography
-        print('Using saved homography h:', h)
-    finally:
-        # Use homography.
-        if h is None:
-            h = H
-            print('Using saved homography h:', h)
-        height, width, channels = im2.shape
-        im1Reg = cv2.warpPerspective(im1, h, (width, height))
+        matches = None
+        #print('could not match features')
+    
+    if matches is not None:
+        # Sort matches by likelihood of being a match.
+        matches.sort(key=lambda x: x.distance, reverse=False)
 
+        # Remove not so good matches.
+        numGoodMatches = int(len(matches) * GOOD_MATCH_PERCENT)
+        matches = matches[:numGoodMatches]
+
+        # Draw top matches.
+        imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
+        #cv2.imshow('Matches', imMatches)
+        #cv2.waitKey(2000)
+        cv2.imwrite("/home/pi/PlantHealth/SavedImages/matches.jpg", imMatches)
+        
+        # Extract location of good matches.
+        points1 = np.zeros((len(matches), 2), dtype=np.float32)
+        points2 = np.zeros((len(matches), 2), dtype=np.float32)
+
+        for i, match in enumerate(matches):
+            points1[i, :] = keypoints1[match.queryIdx].pt
+            points2[i, :] = keypoints2[match.trainIdx].pt
+
+        # Find homography. 
+        try:
+            h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
+        except:
+            h = H_SHORT #using stored homography
+            #print('Using saved homography h:', h)
+        finally:
+            # Use homography.
+            if h is None or not (np.allclose(h, H_SHORT, rtol=0, atol=0.5) 
+                                 or np.allclose(h, H, rtol=0, atol=0.5)):
+                h = H_SHORT
+                #print('Using saved homography h:', h)
+            #print('Using homography h:', repr(h))
+            height, width, channels = im2.shape
+            im1Reg = cv2.warpPerspective(im1, h, (width, height))
+    else:
+        im1Reg = im1 #could not register the image
     return im1Reg
-
-
-
-# imTranslation()
-def imTranslation(im, imRef):
-    """
-    alignImages()
-    [Description]
-    
-    Paramters:  
-    
-    Preconditions:  CMAP is global and contains RGB values index by 
-                    NDVI in range [0,255]
-    
-    Postconditions:  
-    
-    Returns:  
-    """
-    return
 
     
 # ndvi_map()
@@ -150,22 +139,50 @@ def ndvi_map(red_img, nir_img):
     """
     global CMAP
     #calculate NDVI values pixel-wise and scale to 0-255
-    #ndvi = ne.evaluate("(nir_img - red_img) / (nir_img+red_img)")
+    #####ndvi = ne.evaluate("(nir_img - red_img)/(nir_img+red_img)")
     #min_ndvi = np.min(ndvi)
     #idx = ne.evaluate("((ndvi - min_ndvi)*128)").astype('uint8')
-    idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
+    #####idx = ne.evaluate("((ndvi + 1)*128)").astype('uint8')
     #idx = (((nir_img - red_img) / (nir_img+red_img) + 1)*128).astype('uint8')
+    idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
 
-    return CMAP[idx]
+    return CMAP[idx], 0#int(np.mean(np.nan_to_num(ndvi))*1000)/1000
  
  
+ 
+# ndvi_map2()
+def ndvi_map2(red_img, nir_img):    
+    """
+    ndvi_map()
+    [Description]
+    
+    Paramters:  
+    
+    Preconditions:  CMAP is global and contains RGB values index by 
+                    NDVI in range [0,255]
+    
+    Postconditions:  
+    
+    Returns:  
+    """
+    global CMAP
+    #calculate NDVI values pixel-wise and scale to 0-255
+    ndvi = ne.evaluate("(nir_img - red_img)/(nir_img+red_img)")
+    #min_ndvi = np.min(ndvi)
+    #idx = ne.evaluate("((ndvi - min_ndvi)*128)").astype('uint8')
+    idx = ne.evaluate("((ndvi + 1)*128)").astype('uint8')
+    #idx = (((nir_img - red_img) / (nir_img+red_img) + 1)*128).astype('uint8')
+    #idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
+
+    return CMAP[idx], int(np.mean(np.nan_to_num(ndvi))*1000)/1000
 # process_snapshot()
 def process_snapshot(im, imRef):
     """
     ndvi_map()
     [Description]
     
-    Paramters:  
+    Paramters:  im - bgr image
+                imRef - bgr image
     
     Preconditions:  CMAP is global and contains RGB values index by 
                     NDVI in range [0,255]
@@ -193,7 +210,7 @@ def process_snapshot(im, imRef):
     [_, _,NIRimg] = cv2.split(imReg)
  
     # Generate NDVI image
-    NDVIimg = ndvi_map(Rimg, NIRimg)
+    NDVI, avg = ndvi_map2(Rimg, NIRimg)
     
     #show NDVI image
     #cv2.imshow('NDVI Snap', NDVIimg)
@@ -205,11 +222,12 @@ def process_snapshot(im, imRef):
     out_path_Ref = "/home/pi/PlantHealth/SavedImages/"+t+"_Ref.jpg"
     out_path_im = "/home/pi/PlantHealth/SavedImages/"+t+"_im.jpg"
     print('Writing file to: ', out_path_NDVI)
-    cv2.imwrite(out_path_NDVI, NDVIimg)
+    NDVIimg = cv2.cvtColor(NDVI, cv2.COLOR_RGB2BGR) #convert to BGR to save with cv2
+    cv2.imwrite(out_path_NDVI, NDVIimg) #have to save bgr format with cv2
     cv2.imwrite(out_path_Ref, imRef)
     cv2.imwrite(out_path_im, im)
     
-    return NDVIimg, t
+    return NDVI, avg, t
 
     #MAX_FEATURES=last_MAX_FEATURES
     #GOOD_MATCH_PERCENT = last_MAX_FEATURES
@@ -226,14 +244,15 @@ def snapshot(camera):
     #lamps(GPIO.HIGH)
     #reference to camera capture
     with PiRGBArray(camera) as raw:
-        raw = PiRGBArray(camera) 
+        #raw = PiRGBArray(camera) 
         #get image from camera
+        lamps(GPIO.HIGH)
         camera.capture(raw, format='bgr')
         lamps(GPIO.LOW)
         #print('Captured')
         imRef = raw.array
-    #save images
-    return imRef
+    
+        return imRef
  
 
 # get_frame()
@@ -243,9 +262,9 @@ def get_frame(camera, pirgbarray, fmt='bgr'):
     #get image from camera
     pirgbarray.truncate(0) #clear stream
     camera.capture(pirgbarray, format=fmt, use_video_port=True)
-    lamps(GPIO.LOW)
-    img = pirgbarray.array
-    return img
+    #lamps(GPIO.LOW)
+    #img = pirgbarray.array
+    return pirgbarray.array#img
 
 
 #Class VisVideo()
@@ -259,9 +278,10 @@ class VisVideo(threading.Thread):
         self.start()
         
     def run(self):
-        time.sleep(0.5)
         print('Running video thread')
         self.gui.iv.camera_change(3) #RGB camera
+        while self.gui.iv.camera is not 3:
+            continue
         with picamera.array.PiRGBArray(self.gui.camera) as frame:
             while self.gui.VidMode == VIS_VID:
                 try:
@@ -286,35 +306,49 @@ class NDVIVideo(threading.Thread):
         
     def run(self):
         print('Running NDVI video thread')
-        time.sleep(0.5)
+        sleep_time = 0.01
+        lamps(GPIO.HIGH)
+        time.sleep(sleep_time)
         while self.gui.VidMode == NDVI_VID:
+            #t = time.time()
             with picamera.array.PiRGBArray(self.gui.camera) as frame:
                 try:
                     self.gui.iv.camera_change(1) #start at NIR camera
+                    while self.gui.iv.camera is not 1:
+                        continue
+                    time.sleep(sleep_time)
                     im = get_frame(self.gui.camera, frame)
                 except:
                     im = None
                     print('NDVI (NIR) frame error')
             #print('got nir frame')
-            time.sleep(0.03)
+            #time.sleep(0.001)
             #*****loop here  for some time******
             with picamera.array.PiRGBArray(self.gui.camera) as frame:
                 try:
                     self.gui.iv.camera_change(3) #get RGB image
+                    while self.gui.iv.camera is not 3:
+                        continue
+                    time.sleep(sleep_time)
                     imRef = get_frame(self.gui.camera, frame)
                 except:
                     imRef = None
                     print('NDVI (VIS) frame error')
-            
+            #print('Capture time:', time.time() - t)
             #process images
             #imReg = alignImages(im, imRef)
             if im is not None and imRef is not None:
-                height, width, channels = im.shape
-                imReg = cv2.warpPerspective(im, H, (width, height))
+                #t = time.time()
+                #height, width, channels = im.shape
+                imReg = cv2.warpPerspective(im, H, (640, 480))
+                #imReg = alignImages(im, imRef)
+                #t = time.time()
+                #imReg = alignImages(im, imRef)
                 [_,_,NIR] = cv2.split(imReg)
                 [_,_,R] = cv2.split(imRef)
-                self.gui.img = ndvi_map(R, NIR)
+                self.gui.img,_ = ndvi_map(R, NIR) #rgb image
                 self.gui.frame_ready = True
             #print('Frame is ready')
+        lamps(GPIO.LOW)
         return
 
