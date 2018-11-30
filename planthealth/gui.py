@@ -134,7 +134,7 @@ class MainWindow(wx.Frame):
         self.b_cap.Bind(wx.EVT_BUTTON, self.DeleteImage)
         
         #reset fps and update Average NDVI
-        self.FPS.SetLabel('0 frames/sec')
+        self.FPS.SetLabel('')
         self.AVG.SetLabel('Average NDVI: '+str(self.AvgNDVI))
 
         self.LoadImage() #load image refreshes button
@@ -199,7 +199,7 @@ class MainWindow(wx.Frame):
             self.frames = self.frames+1
             self.frame_ready = False
             self.LoadImage()
-            self.FPS.SetLabel(str((self.frames+0.5)//((time.time()-self.StartTime+0.5)))+' frames/sec')
+            self.FPS.SetLabel(str((self.frames*1.2+0.5)//((time.time()-self.StartTime+0.5)))+' frames/sec')
         
             
             

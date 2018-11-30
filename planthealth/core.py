@@ -13,6 +13,7 @@ from config import *
 import RPi.GPIO as GPIO
 import threading
 import wx
+import pickle
 from config import NDVI_VID, NO_VID, VIS_VID
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(37, GPIO.OUT)
@@ -174,7 +175,7 @@ def ndvi_map2(red_img, nir_img):
     #idx = (((nir_img - red_img) / (nir_img+red_img) + 1)*128).astype('uint8')
     #idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
 
-    return CMAP[idx], int(np.mean(np.nan_to_num(ndvi))*1000)/1000
+    return CMAP[idx], int(np.mean(np.nan_to_num(ndvi)[ndvi>0])*1000)/1000
 # process_snapshot()
 def process_snapshot(im, imRef):
     """
@@ -280,7 +281,7 @@ class VisVideo(threading.Thread):
     def run(self):
         print('Running video thread')
         self.gui.iv.camera_change(3) #RGB camera
-        while self.gui.iv.camera is not 3:
+        while self.gui.iv.camera is not 3 and self.gui.VidMode == NDVI_VID:
             continue
         with picamera.array.PiRGBArray(self.gui.camera) as frame:
             while self.gui.VidMode == VIS_VID:
@@ -309,12 +310,13 @@ class NDVIVideo(threading.Thread):
         sleep_time = 0.01
         lamps(GPIO.HIGH)
         time.sleep(sleep_time)
+        result=[]
         while self.gui.VidMode == NDVI_VID:
-            #t = time.time()
+            t = time.time()
             with picamera.array.PiRGBArray(self.gui.camera) as frame:
                 try:
                     self.gui.iv.camera_change(1) #start at NIR camera
-                    while self.gui.iv.camera is not 1:
+                    while self.gui.iv.camera is not 1  and self.gui.VidMode == NDVI_VID:
                         continue
                     time.sleep(sleep_time)
                     im = get_frame(self.gui.camera, frame)
@@ -327,7 +329,7 @@ class NDVIVideo(threading.Thread):
             with picamera.array.PiRGBArray(self.gui.camera) as frame:
                 try:
                     self.gui.iv.camera_change(3) #get RGB image
-                    while self.gui.iv.camera is not 3:
+                    while self.gui.iv.camera is not 3 and self.gui.VidMode == NDVI_VID:
                         continue
                     time.sleep(sleep_time)
                     imRef = get_frame(self.gui.camera, frame)
@@ -349,6 +351,9 @@ class NDVIVideo(threading.Thread):
                 self.gui.img,_ = ndvi_map(R, NIR) #rgb image
                 self.gui.frame_ready = True
             #print('Frame is ready')
+            result.append(time.time()-t)
         lamps(GPIO.LOW)
+        with open('/home/pi/PlantHealth/planthealth/tests/Performance/proc_time_f.pkl', 'wb') as f:
+            pickle.dump(str(result), f)
         return
 
