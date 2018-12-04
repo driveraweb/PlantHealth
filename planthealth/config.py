@@ -1,24 +1,26 @@
 import numpy as np
 
+#Video mode state enumeration for the wx GUI
 NDVI_VID = 0
 VIS_VID = 1
 NO_VID = -1
+
+#Default camera specifications
 FRAMERATE = 40
+
+#Registration hyperaparameters
 MAX_FEATURES = 500
 GOOD_MATCH_PERCENT = .12
+
+#Stored homographies in case features cannot be matched
 H = np.asarray([[ 9.20594188e-01,  -1.42957852e-01,  2.54077905e+01],
                 [-1.95122194e-02,   8.20436221e-01,  4.61027479e+01],
                 [-1.97094364e-05,  -3.27387298e-04,  1.00000000e+00]])
 H_SHORT = np.asarray([[ 9.96989355e-01, -3.23739855e-02, -2.29815889e+01],
                       [-5.52607506e-03,  9.61416255e-01,  2.97800662e+01],
                       [ 3.13973868e-05, -1.09498814e-04,  1.00000000e+00]])
-#H_LONG
-#H = np.asarray([[ 8.86888432e-01,  4.39226569e-02,  2.45432770e+01],
-#       [-2.51932559e-02,  9.22965234e-01,  1.07536386e+02],
-#       [-3.72214918e-05,  3.27009413e-05,  1.00000000e+00]])
-#H_long = np.asarray([[  9.80667346e-01,   1.26994766e-02,   1.78365943e+01],
-#       [ -4.96549469e-02,   1.01925158e+00,   2.79901091e+01],
-#       [ -1.06449700e-04,   3.45053055e-06,   1.00000000e+00]])
+
+#Color map lookup table                    
 CMAP = np.asarray([[255, 255, 255],
        [250, 250, 250],
        [246, 246, 246],

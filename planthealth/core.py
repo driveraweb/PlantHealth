@@ -3,17 +3,17 @@ import numpy as np
 import numexpr as ne
 import datetime
 import time
-import sys
 import picamera
 from picamera.array import PiRGBArray
 import scipy
 import cv2
 import os
-from config import *
+from config import CMAP, GOOD_MATCH_PERCENT, MAX_FEATURES, H, H_SHORT
+from config import FRAMERATE
 import RPi.GPIO as GPIO
 import threading
 import wx
-import pickle
+#import pickle
 from config import NDVI_VID, NO_VID, VIS_VID
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(37, GPIO.OUT)
@@ -22,45 +22,51 @@ GPIO.setwarnings(False)
 global MAX_FEATURES
 global GOOD_MATCH_PERCENT
 
-#cython stuff
-#cimport numpy as np
-#DTYPE = np.float32
-#ctypedef np.int_t DTYPE_t
-
 ### FUNCTIONS USED FOR NDVI IMAGE PROCESSING AND USER INTERFACE ###
 
-#lamps()
+# lamps()
 def lamps(val):
     """
     lamps()
-    [Description]
+    Sets the GPIO (physical) pins 37 and 38 to high or low based on the
+        argument value.
     
-    Paramters:  val - GPIO.HIGH or 1to turn lamps on
-                                  GPIO.LOW or 0 to turn lamps off
+    Paramters:  val - GPIO.HIGH or 1 to turn lamps on
+                      GPIO.LOW or 0 to turn lamps off
     
-    Preconditions:  
+    Preconditions: none
     
     Postconditions: The lamps are turned on or off  
     
-    Returns:  
+    Returns: none 
     """
     GPIO.output(37, val)
     GPIO.output(38,val)
 
-#alignImages()
+# alignImages()
 def alignImages(im1, im2):
     """
     alignImages()
-    [Description]
+        Aligns the key features in im1 with the key features in im2 using
+        OpenCV's ORB feature detector, a brute force hamming matcher, and
+        RANSAC to estimate the homography matrix h. Once the matrix h is 
+        found, im1 is warped producing im1reg, the aligned image.
     
-    Paramters:  
+    Paramters:  im1 - the image to be registered to the same space
+                      as im2
+                im2 - the reference image
     
     Preconditions:  CMAP is global and contains RGB values index by 
                     NDVI in range [0,255]
     
-    Postconditions:  
+    Postconditions:  im1 and im2 remain unchanged
+                     the image "matches.jpg" is saved in 
+                        /home/pi/SavedImages/ showing the features 
+                        the are being matched together to generate the
+                        homography matrix
     
-    Returns:  
+    Returns:  im1reg - the registered version of im1. im1reg should have
+                           its features aligned with im2.
     """
     #adjust max_features and good_match_percents
     #print('Max features', MAX_FEATURES)
@@ -103,7 +109,8 @@ def alignImages(im1, im2):
             points1[i, :] = keypoints1[match.queryIdx].pt
             points2[i, :] = keypoints2[match.trainIdx].pt
 
-        # Find homography. 
+        # Find homography or use a stored version in case of emergency
+        #     or if the homography seems inaccurate.
         try:
             h, mask = cv2.findHomography(points1, points2, cv2.RANSAC)
         except:
@@ -127,16 +134,26 @@ def alignImages(im1, im2):
 def ndvi_map(red_img, nir_img):    
     """
     ndvi_map()
-    [Description]
+    Given the pixel values of an image corresponding to red reflectance
+        and the pixel values of the same image corresponding to near
+        infrared reflectance, the normalized difference vegetation 
+        index (NDVI) values are computed pixel-wise and color mapped
+        using the custom color map lookup table (256)
+    This function is used for real-time video frame processing, since
+        it uses NumExpr and does not compute the average NDVI for 
+        vegetation pixels (NDVI > 0).
     
-    Paramters:  
+    Paramters:  red_img - array containing red pixel values
+                nir_img - array containing NIR pixel values
     
-    Preconditions:  CMAP is global and contains RGB values index by 
-                    NDVI in range [0,255]
+    Preconditions:  CMAP is defined and contains RGB values by index 
+                    for NDVI scaled to range [0,255]
     
-    Postconditions:  
+    Postconditions:  the colormap is set
     
-    Returns:  
+    Returns:  the RGB image where each pixel is color mapped based on
+              NDVI value. 
+              A 0 is also returned as an extra value.
     """
     global CMAP
     #calculate NDVI values pixel-wise and scale to 0-255
@@ -154,17 +171,29 @@ def ndvi_map(red_img, nir_img):
 # ndvi_map2()
 def ndvi_map2(red_img, nir_img):    
     """
-    ndvi_map()
-    [Description]
+    ndvi_map2()
+    Given the pixel values of an image corresponding to red reflectance
+        and the pixel values of the same image corresponding to near
+        infrared reflectance, the normalized difference vegetation 
+        index (NDVI) values are computed pixel-wise and color mapped
+        using the custom color map lookup table (256)
+    This function is used for single image captures since it also 
+        computes the average vegetation NDVI (i.e. mean over pixels 
+        with NDVI >0).
     
-    Paramters:  
+    Paramters:  red_img - array containing red pixel values
+                nir_img - array containing NIR pixel values
     
-    Preconditions:  CMAP is global and contains RGB values index by 
-                    NDVI in range [0,255]
+    Preconditions:  CMAP is defined and contains RGB values by index 
+                    for NDVI scaled to range [0,255]
     
-    Postconditions:  
+    Postconditions:  the colormap is set
     
-    Returns:  
+    Returns:  the RGB image where each pixel is color mapped based on
+              NDVI value. 
+              The average (arithmetic mean) of all pixels with NDVI > 0
+              is also returned, corresponding to the average NDVI of 
+              vegetation in the image.
     """
     global CMAP
     #calculate NDVI values pixel-wise and scale to 0-255
@@ -176,21 +205,34 @@ def ndvi_map2(red_img, nir_img):
     #idx = ne.evaluate("(((nir_img - red_img) / (nir_img+red_img) + 1)*128)").astype('uint8')
 
     return CMAP[idx], int(np.mean(np.nan_to_num(ndvi)[ndvi>0])*1000)/1000
+
+
 # process_snapshot()
 def process_snapshot(im, imRef):
     """
-    ndvi_map()
-    [Description]
+    process_snapshot()
+    Converts two image (the NIR and VIS) images into the NDVI color
+        mapped image
     
-    Paramters:  im - bgr image
-                imRef - bgr image
+    Paramters:  im - contains the NIR reflectance values
+                imRef - contains the visible (red) reflectance values
     
     Preconditions:  CMAP is global and contains RGB values index by 
-                    NDVI in range [0,255]
+                    NDVI in range [0,255].
+                    im is an array of the form BGR
+                    imRef is an array of the form BGR
     
-    Postconditions:  
+    Postconditions:  im, imRef, and their resulting NDVI image is saved
+                     to /home/pi/PlantHealth/SavedImages/
+                     with im as '[datetime]_im.jpg', 
+                     imRef as '[datetime]_Ref.jpg', 
+                     and NDVI as '[datetime]_ndvi.jpg'
     
-    Returns:  
+    Returns:  NDVI - The NDVI mapped image
+              avg - The average NDVI value of the vegetaion in the images
+              t - a string of the datetime object indicating the last_GOOD_MATCH_PERCENT
+                  set of saved images. Can be used to access the images
+                  in the future.
     """
     #global MAX_FEATURES
     #global GOOD_MATCH_PERCENT
@@ -242,6 +284,23 @@ def process_snapshot(im, imRef):
 #     framerate = 24
 #     time.sleep(2)
 def snapshot(camera):
+    """
+    snapshot()
+    Captures an image in bgr form to an array using the given camera
+        object.
+    
+    Paramters:  camera - the camera used to capture the image
+    
+    Preconditions:  if the lamps are connects to GPIO pins 37 and 38, 
+                        then they will be turn on during capture and off
+                        after the capture. 
+                    camera is set up with desired parameters for image
+    
+    Postconditions:  The image captured using camera will have pixel 
+                     values in the form BGR
+    
+    Returns:  the image captured in BGR form as an array
+    """
     #lamps(GPIO.HIGH)
     #reference to camera capture
     with PiRGBArray(camera) as raw:
@@ -259,19 +318,34 @@ def snapshot(camera):
 # get_frame()
 #    pirgbarray must be set up with camera
 def get_frame(camera, pirgbarray, fmt='bgr'):
-    #lamps(GPIO.HIGH)
+    """
+    get_frame()
+    returns an array of a frame for a video feed
+    
+    Paramters:  camera - the camera object to capture the image with
+                pirgbarray - 
+                fmt - default is bgr. see picamera capture() 
+                      documentation for other possible formats
+    
+    Preconditions:  camera and pirgbarray are correctly defined
+    
+    Postconditions:  none
+    
+    Returns:  array containing the pixel values in the specified format
+    """
     #get image from camera
     pirgbarray.truncate(0) #clear stream
     camera.capture(pirgbarray, format=fmt, use_video_port=True)
-    #lamps(GPIO.LOW)
-    #img = pirgbarray.array
+
     return pirgbarray.array#img
 
 
 #Class VisVideo()
-#
 class VisVideo(threading.Thread):
-    
+    """
+    Inherits from threading.Thread so that visible video can be
+        captured as a background thread. 
+    """
     def __init__(self, gui):
         self.gui = gui
         threading.Thread.__init__(self) 
@@ -296,9 +370,11 @@ class VisVideo(threading.Thread):
  
  
 #Class NDVIVideo()
-#
 class NDVIVideo(threading.Thread):
-    
+    """
+    Inherits from threading.Thread so that visible video can be
+        captured as a background thread. 
+    """
     def __init__(self, gui):
         self.gui = gui
         threading.Thread.__init__(self) 
@@ -353,7 +429,6 @@ class NDVIVideo(threading.Thread):
             #print('Frame is ready')
             result.append(time.time()-t)
         lamps(GPIO.LOW)
-        with open('/home/pi/PlantHealth/planthealth/tests/Performance/proc_time_f.pkl', 'wb') as f:
-            pickle.dump(str(result), f)
+        #with open('/home/pi/PlantHealth/planthealth/tests/Performance/proc_time_f.pkl', 'wb') as f:
+        #    pickle.dump(str(result), f)
         return
-
