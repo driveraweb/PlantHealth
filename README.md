@@ -75,7 +75,7 @@ chmod +x install.sh
 ```
 pip install -r requirements.txt
 ```
-[Install IVPort-v2](https://github.com/ivmech/ivport-v2)
+[Install IVPort-v2](https://github.com/ivmech/ivport-v2) to /home/pi/Downloads
 
 [Install picamera](https://github.com/waveform80/picamera) 
 
@@ -83,7 +83,7 @@ pip install -r requirements.txt
 
 ### Auto-start Application at Startup
 
-
+Use your favorite method to run ./bin/run.sh or [see this link](https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/)
 
 
 ## Built With
