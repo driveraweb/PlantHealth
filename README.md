@@ -4,7 +4,7 @@ Being that changes in plant health may not be present upon visual inspection alo
 
 **NDVI Color Scale Used:**
 
-![NDVI Scale](scale.jpg "NDVI Scale")
+![NDVI Scale](SavedImages/scale.jpg "NDVI Scale")
 
 
 
@@ -15,6 +15,7 @@ Being that changes in plant health may not be present upon visual inspection alo
 * Jose Olivarez
 * Derrick Rivera
 * **Mentor:**  Dr. Charles Creusere
+* **Coordinator:**  Dr. Satish Ranade
 
 
 ## Getting Started
@@ -34,6 +35,7 @@ This software was designed and implemented using the following hardware:
 * IVPort V2 Pi Camera Multiplexer 
 * Waveshare 7" Touchscreen Display
 * 3W Infrared Illuminator (2)
+* Common collector current amplifier (2) 
 * RAVPower 22000mAH 4.5A Portable Phone Power Pack
 
 
@@ -58,11 +60,14 @@ This is where we add additional notes about how to deploy this on a live system
 
 A step-by-step series that tells you how to get a Plant Health imaging software running
 
+Make sure Python3.x is installed.
+
 [Install git](https://projects.raspberrypi.org/en/projects/getting-strated-with-git/4)
 
 [Introduction to git](https://product.hubspot.com/blog/git-and-github-tutorial-for-beginners)
 
 Install the dependencies:
+[Install numpy using this method](https://hunseblog.wordpress.com/2014/09/15/installing-numpy-and-openblas/) 
 ```
 chmod +x install.sh
 ./install.sh
@@ -72,9 +77,11 @@ pip install -r requirements.txt
 
 [Install picamera](https://github.com/waveform80/picamera) 
 
-[Install numpy with this method](https://hunseblog.wordpress.com/2014/09/15/installing-numpy-and-openblas/) 
 
-[Install OpenCV for C++](https://docs.opencv.org/trunk/d7/d9f/tutorial_linux_install.html)
+
+### Autostart application at startup
+
+
 
 
 ## Built With
@@ -85,21 +92,17 @@ pip install -r requirements.txt
 * wheel
 * setuptools
 * numpy
-* matplotlib
-* pillow
+* numexpr
 * opencv-python
-* scikit-image
-* imageio
 * wxPython 
+* threading
+* picamera
+* picamera[array]
+* ivport
+* datetime
+* RPi.GPIO
 
-**C++ Libraries**
+**C++ Libraries** (see 'Install Numpy using this method')
 
-* OpenCV
-
-
-
-## Acknowledgments
-
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
+* BLAS
+* LAPACK
