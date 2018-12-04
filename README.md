@@ -81,7 +81,7 @@ pip install -r requirements.txt
 
 
 
-### Autostart application at startup
+### Auto-start Application at Startup
 
 
 
