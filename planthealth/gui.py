@@ -217,12 +217,4 @@ class MainWindow(wx.Frame):
         time.sleep(0.1)
         
         self.Close(True) #close app
-        
-
-
-    #def OnLoad(self, e):
-        
-
-#app = wx.App()  # create application object
-#frame = MainWindow(None, title="NDVI Camera Suite")   # establish current frame
-#app.MainLoop()  # enters main loop
+  
