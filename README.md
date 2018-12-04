@@ -67,10 +67,12 @@ Make sure Python3.x is installed.
 [Introduction to git](https://product.hubspot.com/blog/git-and-github-tutorial-for-beginners)
 
 Install the dependencies:
-[Install numpy using this method](https://hunseblog.wordpress.com/2014/09/15/installing-numpy-and-openblas/) 
 ```
 chmod +x install.sh
 ./install.sh
+```
+[Install numpy using this method](https://hunseblog.wordpress.com/2014/09/15/installing-numpy-and-openblas/) 
+```
 pip install -r requirements.txt
 ```
 [Install IVPort-v2](https://github.com/ivmech/ivport-v2)
