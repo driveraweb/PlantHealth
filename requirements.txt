@@ -3,7 +3,6 @@ six
 wheel
 setuptools
 numexpr
-matplotlib
 picamera[array]
 pillow
 opencv-python

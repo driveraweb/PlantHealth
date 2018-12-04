@@ -5,9 +5,7 @@ import datetime
 import time
 import picamera
 from picamera.array import PiRGBArray
-import scipy
 import cv2
-import os
 from config import CMAP, GOOD_MATCH_PERCENT, MAX_FEATURES, H, H_SHORT
 from config import FRAMERATE
 import RPi.GPIO as GPIO
